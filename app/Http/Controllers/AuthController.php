@@ -43,10 +43,13 @@ class AuthController extends Controller
         $loginInput = trim($credentials['login']);
         $password = $credentials['password'];
 
-        // Search by email or staff_id
-        $user = User::where('email', $loginInput)
-            ->orWhere('staff_id', $loginInput)
-            ->first();
+        // Email comparison follows the database collation; Staff ID must match exactly.
+        $user = User::where('email', $loginInput)->first();
+
+        if (! $user) {
+            $staffUser = User::where('staff_id', $loginInput)->first();
+            $user = $staffUser?->staff_id === $loginInput ? $staffUser : null;
+        }
 
         if ($user) {
             $isValidPassword = false;

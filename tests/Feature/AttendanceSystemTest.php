@@ -68,6 +68,16 @@ test('can login as staff and redirects to staff dashboard', function () {
     $this->assertAuthenticatedAs($this->staff);
 });
 
+test('staff id login is case-sensitive', function () {
+    $response = $this->post(route('login.post'), [
+        'login' => 'stf_01',
+        'password' => 'password123',
+    ]);
+
+    $response->assertSessionHasErrors('login');
+    $this->assertGuest();
+});
+
 test('remember my login does not create a persistent authentication cookie', function () {
     $response = $this->post(route('login.post'), [
         'login' => 'HR_01',

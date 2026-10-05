@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AttendanceManagementController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\StaffManagementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Staff\AttendanceController as StaffAttendanceController;
@@ -48,6 +49,9 @@ Route::prefix('admin')
     ->middleware(['auth', 'role:admin'])
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile.show');
+        Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password');
 
         // Staff CRUD
         Route::get('/staff', [StaffManagementController::class, 'index'])->name('staff.index');
