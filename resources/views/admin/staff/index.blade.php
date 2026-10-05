@@ -67,7 +67,7 @@
                                 {{ $user->staff_id }}
                             </td>
                             <td class="py-4 px-6 text-slate-900 font-semibold text-xs sm:text-sm">
-                                {{ $user->name }}
+                                {{ mb_strtoupper($user->name, 'UTF-8') }}
                             </td>
                             <td class="py-4 px-6 text-xs text-slate-600">
                                 {{ $user->email }}
@@ -110,7 +110,7 @@
 
                                     <!-- Delete Button -->
                                     @if(auth()->id() !== $user->staff_id)
-                                        <form action="{{ route('admin.staff.destroy', $user->staff_id) }}" method="POST" onsubmit="return confirm('Adakah anda pasti untuk memadam staf {{ $user->staff_id }} ({{ $user->name }})?')">
+                                        <form action="{{ route('admin.staff.destroy', $user->staff_id) }}" method="POST" onsubmit="return confirm('Adakah anda pasti untuk memadam staf {{ $user->staff_id }} ({{ mb_strtoupper($user->name, 'UTF-8') }})?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" 
@@ -342,7 +342,7 @@
     }
 
     function openEditModal(user) {
-        document.getElementById('editStaffSubtitle').innerText = `Kemas kini staf: ${user.staff_id} (${user.name})`;
+        document.getElementById('editStaffSubtitle').innerText = `Kemas kini staf: ${user.staff_id} (${user.name.toUpperCase()})`;
         document.getElementById('edit_name').value = user.name;
         document.getElementById('edit_email').value = user.email;
         document.getElementById('edit_phone_number').value = user.phone_number || '';
@@ -352,7 +352,7 @@
     }
 
     function openResetPasswordModal(staffId, staffName) {
-        document.getElementById('resetPasswordSubtitle').innerText = `Menetapkan semula kata laluan bagi: ${staffId} (${staffName})`;
+        document.getElementById('resetPasswordSubtitle').innerText = `Menetapkan semula kata laluan bagi: ${staffId} (${staffName.toUpperCase()})`;
         document.getElementById('resetPasswordForm').action = `/admin/staff/${staffId}/reset-password`;
         openModal('resetPasswordModal');
     }

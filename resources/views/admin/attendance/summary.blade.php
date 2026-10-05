@@ -56,14 +56,14 @@
                     id="staffSearchInput"
                     name="staff_search"
                     list="staffSearchOptions"
-                    value="{{ $selectedStaffSummary ? $selectedStaffSummary->staff_id . ' - ' . $selectedStaffSummary->name : '' }}"
+                    value="{{ $selectedStaffSummary ? $selectedStaffSummary->staff_id . ' - ' . mb_strtoupper($selectedStaffSummary->name, 'UTF-8') : '' }}"
                     placeholder="Cari staf..."
                     class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                 <input type="hidden" name="staff_id" id="staffIdHidden" value="{{ $selectedStaffId }}">
                 <datalist id="staffSearchOptions">
                     @foreach($allStaffList as $stf)
-                        <option value="{{ $stf->staff_id }} - {{ $stf->name }}" data-staff-id="{{ $stf->staff_id }}"></option>
+                        <option value="{{ $stf->staff_id }} - {{ mb_strtoupper($stf->name, 'UTF-8') }}" data-staff-id="{{ $stf->staff_id }}"></option>
                     @endforeach
                 </datalist>
             </div>
@@ -168,7 +168,7 @@
                                 {{ $row['staff']->staff_id }}
                             </td>
                             <td class="py-4 px-5 font-bold text-slate-900 text-xs sm:text-sm">
-                                {{ $row['staff']->name }}
+                                {{ mb_strtoupper($row['staff']->name, 'UTF-8') }}
                             </td>
                             <td class="py-4 px-5 text-center font-bold text-slate-800">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -198,7 +198,7 @@
                             <td colspan="8" class="p-4 sm:p-6">
                                 <div class="bg-white p-4 rounded-2xl border border-slate-200">
                                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3">
-                                        Log Terperinci Kehadiran: {{ $row['staff']->name }} ({{ $row['staff']->staff_id }})
+                                        Log Terperinci Kehadiran: {{ mb_strtoupper($row['staff']->name, 'UTF-8') }} ({{ $row['staff']->staff_id }})
                                     </h4>
 
                                     <table class="w-full text-xs text-left">

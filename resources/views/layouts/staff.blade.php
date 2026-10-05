@@ -55,12 +55,12 @@
                 <!-- User profile & Logout -->
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
-                        <div class="text-sm font-semibold text-slate-800 leading-tight">{{ auth()->user()->name }}</div>
+                        <div class="text-sm font-semibold text-slate-800 leading-tight">{{ mb_strtoupper(auth()->user()->name, 'UTF-8') }}</div>
                         <div class="text-xs text-slate-500 font-mono-num">{{ auth()->user()->staff_id }}</div>
                     </div>
                     <div class="w-9 h-9 rounded-full overflow-hidden bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm border border-indigo-200 shrink-0">
                         @if (auth()->user()->img)
-                            <img src="{{ asset('storage/' . auth()->user()->img) }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
+                            <img src="{{ asset('storage/' . auth()->user()->img) }}" alt="{{ mb_strtoupper(auth()->user()->name, 'UTF-8') }}" class="w-full h-full object-cover">
                         @else
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         @endif

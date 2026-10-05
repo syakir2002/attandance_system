@@ -86,7 +86,7 @@
                         <div class="py-3 flex items-center justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="text-xs font-bold text-slate-800 truncate">
-                                    {{ $active->user->name ?? $active->staff_id }}
+                                    {{ mb_strtoupper($active->user->name ?? $active->staff_id, 'UTF-8') }}
                                 </div>
                                 <div class="text-[11px] text-slate-500 font-mono-num">
                                     {{ $active->staff_id }} &bull; Masuk: {{ $active->check_in }}
@@ -114,7 +114,7 @@
                 <div class="text-xs font-bold text-slate-700 mb-2">Staf Belum Clock In Hari Ini ({{ $absentStaff->count() }})</div>
                 <div class="flex flex-wrap gap-1.5">
                     @forelse($absentStaff as $absent)
-                        <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs bg-slate-100 text-slate-600 font-mono-num" title="{{ $absent->name }}">
+                        <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs bg-slate-100 text-slate-600 font-mono-num" title="{{ mb_strtoupper($absent->name, 'UTF-8') }}">
                             {{ $absent->staff_id }}
                         </span>
                     @empty
@@ -152,7 +152,7 @@
                         @forelse($todayRecords as $rec)
                             <tr class="hover:bg-slate-50/50 transition-colors">
                                 <td class="py-3 px-5">
-                                    <div class="text-xs font-bold text-slate-900">{{ $rec->user->name ?? $rec->staff_id }}</div>
+                                    <div class="text-xs font-bold text-slate-900">{{ mb_strtoupper($rec->user->name ?? $rec->staff_id, 'UTF-8') }}</div>
                                     <div class="text-[11px] text-slate-500 font-mono-num">{{ $rec->staff_id }}</div>
                                 </td>
                                 <td class="py-3 px-5 font-mono-num text-xs text-indigo-600">

@@ -14,7 +14,7 @@
                     Sesi Kerja Hari Ini
                 </div>
                 <h1 class="text-lg sm:text-xl font-extrabold tracking-tight">
-                    Hai, {{ $user->name }}! 👋
+                    Hai, {{ mb_strtoupper($user->name, 'UTF-8') }}! 👋
                 </h1>
                 <p class="mt-0.5 text-xs text-indigo-200">
                     Staff ID: <span class="font-mono-num font-bold text-white bg-indigo-950/70 px-1.5 py-0.5 rounded text-xs">{{ $user->staff_id }}</span> &bull; Rekodkan kehadiran kerja harian anda di sini.

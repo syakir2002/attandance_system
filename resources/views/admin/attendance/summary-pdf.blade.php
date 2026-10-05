@@ -1,7 +1,7 @@
 <h1 style="font-size: 16pt; font-weight: bold;">Rekod Kehadiran Kakitangan</h1>
 <table cellpadding="4" style="width: 100%; font-size: 12pt;">
     <tr>
-        <td width="33%" align="center">{{ $row['staff']->name }}</td>
+        <td width="33%" align="center">{{ mb_strtoupper($row['staff']->name, 'UTF-8') }}</td>
         <td width="33%" align="center">Tahun: {{ $selectedYear }}</td>
         <td width="34%" align="center">Bulan: {{ $selectedMonth }}</td>
     </tr>

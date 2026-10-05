@@ -36,14 +36,14 @@
                     id="staffSearchInput"
                     name="staff_search"
                     list="staffSearchOptions"
-                    value="{{ $selectedStaff ? $selectedStaff->staff_id . ' - ' . $selectedStaff->name : '' }}"
+                    value="{{ $selectedStaff ? $selectedStaff->staff_id . ' - ' . mb_strtoupper($selectedStaff->name, 'UTF-8') : '' }}"
                     placeholder="Cari staf..."
                     class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                 <input type="hidden" name="staff_id" id="staffIdHidden" value="{{ $staffId }}">
                 <datalist id="staffSearchOptions">
                     @foreach($staffList as $stf)
-                        <option value="{{ $stf->staff_id }} - {{ $stf->name }}" data-staff-id="{{ $stf->staff_id }}"></option>
+                        <option value="{{ $stf->staff_id }} - {{ mb_strtoupper($stf->name, 'UTF-8') }}" data-staff-id="{{ $stf->staff_id }}"></option>
                     @endforeach
                 </datalist>
             </div>
@@ -155,7 +155,7 @@
                                     {{ $rec->id }}
                                 </td>
                                 <td class="py-3.5 px-5">
-                                    <div class="text-xs font-bold text-slate-900">{{ $rec->user->name ?? $rec->staff_id }}</div>
+                                    <div class="text-xs font-bold text-slate-900">{{ mb_strtoupper($rec->user->name ?? $rec->staff_id, 'UTF-8') }}</div>
                                     <div class="text-[11px] text-slate-500 font-mono-num">{{ $rec->staff_id }}</div>
                                 </td>
                                 <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
@@ -248,7 +248,7 @@
                 <select name="staff_id" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <option value="">-- Sila Pilih Staf --</option>
                     @foreach($staffList as $stf)
-                        <option value="{{ $stf->staff_id }}">{{ $stf->staff_id }} - {{ $stf->name }}</option>
+                        <option value="{{ $stf->staff_id }}">{{ $stf->staff_id }} - {{ mb_strtoupper($stf->name, 'UTF-8') }}</option>
                     @endforeach
                 </select>
             </div>

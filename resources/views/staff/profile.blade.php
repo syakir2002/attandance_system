@@ -8,7 +8,7 @@
     <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center gap-6">
         <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">{{ $user->name }}</h1>
+                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">{{ mb_strtoupper($user->name, 'UTF-8') }}</h1>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                     Staf
                 </span>
@@ -47,10 +47,10 @@
                         <div class="relative group">
                             <div class="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-tr from-indigo-600 to-violet-500 text-white font-black text-4xl flex items-center justify-center shadow-lg shadow-indigo-100 border-4 border-white ring-4 ring-indigo-50 shrink-0 transition-transform duration-300 group-hover:scale-105">
                                 @if ($user->img)
-                                    <img id="preview-avatar" src="{{ asset('storage/' . $user->img) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                                    <img id="preview-avatar" src="{{ asset('storage/' . $user->img) }}" alt="{{ mb_strtoupper($user->name, 'UTF-8') }}" class="w-full h-full object-cover">
                                 @else
                                     <span id="fallback-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
-                                    <img id="preview-avatar" src="" alt="{{ $user->name }}" class="hidden w-full h-full object-cover">
+                                    <img id="preview-avatar" src="" alt="{{ mb_strtoupper($user->name, 'UTF-8') }}" class="hidden w-full h-full object-cover">
                                 @endif
                             </div>
 

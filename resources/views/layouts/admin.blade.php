@@ -65,7 +65,7 @@
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                     <div class="truncate">
-                        <div class="text-xs font-semibold text-white truncate">{{ auth()->user()->name }}</div>
+                        <div class="text-xs font-semibold text-white truncate">{{ mb_strtoupper(auth()->user()->name, 'UTF-8') }}</div>
                         <div class="text-[11px] text-slate-400 font-mono-num">{{ auth()->user()->staff_id }}</div>
                     </div>
                 </div>
