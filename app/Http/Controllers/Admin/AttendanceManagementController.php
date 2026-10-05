@@ -334,7 +334,7 @@ class AttendanceManagementController extends Controller
                 }
             }
 
-            return response(TCPDF::Output($filename, 'S'), Response::HTTP_OK, [
+            return response(TCPDF::Output($filename, 'I'), Response::HTTP_OK, [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ]);
