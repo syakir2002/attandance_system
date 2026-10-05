@@ -3,7 +3,8 @@
 @section('body')
 <div class="min-h-full flex bg-slate-100">
     <!-- Desktop Sidebar -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col shrink-0 min-h-screen border-r border-slate-800">
+    <div class="w-64 shrink-0">
+    <aside class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800">
         <!-- Logo / Brand -->
         <div class="h-16 px-6 flex items-center gap-3 border-b border-slate-800 bg-slate-950/40">
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-indigo-900/40 font-bold">
@@ -18,7 +19,7 @@
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="flex-1 px-3 py-6 space-y-1.5 text-sm font-medium">
+        <nav class="flex-1 overflow-y-auto px-3 py-6 space-y-1.5 text-sm font-medium">
             <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Menu Utama</div>
             
             <a href="{{ route('admin.dashboard') }}" 
@@ -57,7 +58,7 @@
         </nav>
 
         <!-- Current Admin Info & Logout -->
-        <div class="p-4 border-t border-slate-800 bg-slate-950/40">
+        <div class="mt-auto shrink-0 p-4 border-t border-slate-800 bg-slate-950/40">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold flex items-center justify-center text-xs border border-indigo-500/30">
@@ -74,7 +75,7 @@
                         aria-haspopup="dialog"
                         aria-controls="logout-confirm-dialog"
                         title="Log Keluar"
-                        class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors">
+                        class="shrink-0 p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -82,6 +83,7 @@
             </div>
         </div>
     </aside>
+    </div>
 
     <!-- Main Workspace -->
     <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">

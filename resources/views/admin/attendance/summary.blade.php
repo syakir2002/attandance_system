@@ -213,27 +213,35 @@
                                                 <th class="py-2 px-3">Catatan Admin</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-slate-100 font-mono-num">
-                                            @forelse($row['records'] as $rec)
+                                        <tbody class="font-mono-num">
+                                            @php
+                                                $recordsByDate = collect($row['records'])->groupBy(
+                                                    fn ($record) => $record->date->format('Y-m-d')
+                                                );
+                                            @endphp
+                                            @forelse($recordsByDate as $dateKey => $dateRecords)
                                                 @php
-                                                    $dateKey = $rec->date->format('Y-m-d');
                                                     $colorIndex = abs(crc32($dateKey)) % count($dateColorPalette);
                                                     $dateTheme = $dateColorPalette[$colorIndex];
                                                 @endphp
-                                                <tr>
-                                                    <td class="py-2 px-3 font-sans whitespace-nowrap">
-                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border {{ $dateTheme['badge'] }} shadow-2xs">
-                                                            <span class="w-1.5 h-1.5 rounded-full {{ $dateTheme['dot'] }}"></span>
-                                                            {{ $rec->date->format('d-m-Y') }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="py-2 px-3 text-indigo-600 font-bold">{{ $rec->id }}</td>
-                                                    <td class="py-2 px-3 text-slate-700">{{ date('h:i A',strtotime($rec->check_in)) }}</td>
-                                                    <td class="py-2 px-3 text-slate-700">{{ date('h:i A', strtotime($rec->check_out)) ?? '-' }}</td>
-                                                    <td class="py-2 px-3 font-bold text-slate-900">{{ $rec->period ?? '-' }}</td>
-                                                    <td class="py-2 px-3 font-sans text-slate-600">{{ $rec->keterangan_staff ?: '-' }}</td>
-                                                    <td class="py-2 px-3 font-sans text-slate-600">{{ $rec->keterangan_admin ?: '-' }}</td>
-                                                </tr>
+                                                @foreach($dateRecords as $rec)
+                                                    <tr>
+                                                        @if($loop->first)
+                                                            <td rowspan="{{ $dateRecords->count() }}" class="py-2 px-3 font-sans whitespace-nowrap align-middle border-b-2 border-slate-200">
+                                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border {{ $dateTheme['badge'] }} shadow-2xs">
+                                                                    <span class="w-1.5 h-1.5 rounded-full {{ $dateTheme['dot'] }}"></span>
+                                                                    {{ $rec->date->format('d-m-Y') }}
+                                                                </span>
+                                                            </td>
+                                                        @endif
+                                                        <td class="py-2 px-3 text-indigo-600 font-bold border-b-2 border-slate-200">{{ $rec->id }}</td>
+                                                        <td class="py-2 px-3 text-slate-700 border-b-2 border-slate-200">{{ date('h:i A',strtotime($rec->check_in)) }}</td>
+                                                        <td class="py-2 px-3 text-slate-700 border-b-2 border-slate-200">{{ date('h:i A', strtotime($rec->check_out)) ?? '-' }}</td>
+                                                        <td class="py-2 px-3 font-bold text-slate-900 border-b-2 border-slate-200">{{ $rec->period ?? '-' }}</td>
+                                                        <td class="py-2 px-3 font-sans text-slate-600 border-b-2 border-slate-200">{{ $rec->keterangan_staff ?: '-' }}</td>
+                                                        <td class="py-2 px-3 font-sans text-slate-600 border-b-2 border-slate-200">{{ $rec->keterangan_admin ?: '-' }}</td>
+                                                    </tr>
+                                                @endforeach
                                             @empty
                                                 <tr>
                                                     <td colspan="7" class="py-4 text-center text-slate-400 font-sans">Tiada sesi direkodkan pada bulan ini.</td>

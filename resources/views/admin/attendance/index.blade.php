@@ -106,9 +106,9 @@
             <table class="w-full text-left text-sm">
                 <thead>
                     <tr class="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                        <th class="py-3.5 px-5">Tarikh</th>
                         <th class="py-3.5 px-5">ID Sesi</th>
                         <th class="py-3.5 px-5">Staf</th>
-                        <th class="py-3.5 px-5">Tarikh</th>
                         <th class="py-3.5 px-5">Check In</th>
                         <th class="py-3.5 px-5">Check Out</th>
                         <th class="py-3.5 px-5">Tempoh (Period)</th>
@@ -132,72 +132,78 @@
                             ['badge' => 'bg-cyan-50 text-cyan-700 border-cyan-200', 'dot' => 'bg-cyan-500'],
                             ['badge' => 'bg-orange-50 text-orange-700 border-orange-200', 'dot' => 'bg-orange-500'],
                         ];
+                        $recordsByDate = $records->getCollection()->groupBy(
+                            fn ($record) => $record->date->format('Y-m-d')
+                        );
                     @endphp
-                    @forelse($records as $rec)
+                    @forelse($recordsByDate as $dateKey => $dateRecords)
                         @php
-                            $dateKey = $rec->date->format('Y-m-d');
                             $colorIndex = abs(crc32($dateKey)) % count($dateColorPalette);
                             $dateTheme = $dateColorPalette[$colorIndex];
                         @endphp
-                        <tr class="hover:bg-slate-50/60 transition-colors">
-                            <td class="py-3.5 px-5 font-mono-num text-xs font-bold text-indigo-700">
-                                {{ $rec->id }}
-                            </td>
-                            <td class="py-3.5 px-5">
-                                <div class="text-xs font-bold text-slate-900">{{ $rec->user->name ?? $rec->staff_id }}</div>
-                                <div class="text-[11px] text-slate-500 font-mono-num">{{ $rec->staff_id }}</div>
-                            </td>
-                            <td class="py-3.5 px-5 whitespace-nowrap">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border {{ $dateTheme['badge'] }} shadow-2xs">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $dateTheme['dot'] }}"></span>
-                                    {{ $rec->date->format('Y-m-d') }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
-                                {{ $rec->check_in }}
-                            </td>
-                            <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
-                                {{ $rec->check_out ?? '-' }}
-                            </td>
-                            <td class="py-3.5 px-5 font-mono-num text-xs font-bold text-slate-900">
-                                {{ $rec->period ?? '-' }}
-                            </td>
-                            <td class="py-3.5 px-5 text-xs text-slate-600 max-w-xs" title="{{ $rec->keterangan_staff }}">
-                                {{ $rec->keterangan_staff ?: '-' }}
-                            </td>
-                            <td class="py-3.5 px-5 text-xs text-slate-600 max-w-xs" title="{{ $rec->keterangan_admin }}">
-                                {{ $rec->keterangan_admin ?: '-' }}
-                            </td>
-                            <td class="py-3.5 px-5 text-xs text-slate-600 max-w-xs" title="{{ $rec->keterangan_system }}">
-                                {{ $rec->keterangan_system ?: '-' }}
-                            </td>
-                            <td class="py-3.5 px-5 text-right">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <!-- Edit / Correction Button -->
-                                    <button type="button" 
-                                            onclick="openEditAttendanceModal({{ json_encode($rec) }})"
-                                            title="Sunting & Pembetulan"
-                                            class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Delete Button -->
-                                    <form action="{{ route('admin.attendance.destroy', $rec->id) }}" method="POST" onsubmit="return confirm('Adakah anda pasti untuk memadam rekod kehadiran {{ $rec->id }}?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                title="Padam Rekod"
-                                                class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
+                        @foreach($dateRecords as $rec)
+                            <tr class="hover:bg-slate-50/60 transition-colors">
+                                @if($loop->first)
+                                    <td rowspan="{{ $dateRecords->count() }}" class="py-3.5 px-5 whitespace-nowrap align-middle">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border {{ $dateTheme['badge'] }} shadow-2xs">
+                                            <span class="w-1.5 h-1.5 rounded-full {{ $dateTheme['dot'] }}"></span>
+                                            {{ $rec->date->format('Y-m-d') }}
+                                        </span>
+                                    </td>
+                                @endif
+                                <td class="py-3.5 px-5 font-mono-num text-xs font-bold text-indigo-700">
+                                    {{ $rec->id }}
+                                </td>
+                                <td class="py-3.5 px-5">
+                                    <div class="text-xs font-bold text-slate-900">{{ $rec->user->name ?? $rec->staff_id }}</div>
+                                    <div class="text-[11px] text-slate-500 font-mono-num">{{ $rec->staff_id }}</div>
+                                </td>
+                                <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
+                                    {{ $rec->check_in }}
+                                </td>
+                                <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
+                                    {{ $rec->check_out ?? '-' }}
+                                </td>
+                                <td class="py-3.5 px-5 font-mono-num text-xs font-bold text-slate-900">
+                                    {{ $rec->period ?? '-' }}
+                                </td>
+                                <td class="py-3.5 px-5 text-xs text-slate-600 max-w-xs" title="{{ $rec->keterangan_staff }}">
+                                    {{ $rec->keterangan_staff ?: '-' }}
+                                </td>
+                                <td class="py-3.5 px-5 text-xs text-slate-600 max-w-xs" title="{{ $rec->keterangan_admin }}">
+                                    {{ $rec->keterangan_admin ?: '-' }}
+                                </td>
+                                <td class="py-3.5 px-5 text-xs text-slate-600 max-w-xs" title="{{ $rec->keterangan_system }}">
+                                    {{ $rec->keterangan_system ?: '-' }}
+                                </td>
+                                <td class="py-3.5 px-5 text-right">
+                                    <div class="inline-flex items-center gap-1.5">
+                                        <!-- Edit / Correction Button -->
+                                        <button type="button" 
+                                                onclick="openEditAttendanceModal({{ json_encode($rec) }})"
+                                                title="Sunting & Pembetulan"
+                                                class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
+
+                                        <!-- Delete Button -->
+                                        <form action="{{ route('admin.attendance.destroy', $rec->id) }}" method="POST" onsubmit="return confirm('Adakah anda pasti untuk memadam rekod kehadiran {{ $rec->id }}?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    title="Padam Rekod"
+                                                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
                     @empty
                         <tr>
                             <td colspan="10" class="py-12 text-center text-slate-400">
