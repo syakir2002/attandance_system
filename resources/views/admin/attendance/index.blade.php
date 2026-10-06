@@ -280,12 +280,21 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                    Keterangan Staf (Nota)
-                </label>
-                <input type="text" name="keterangan_staff" placeholder="cth: terlupa clock in..."
-                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Keterangan In (Pilihan)
+                    </label>
+                    <input type="text" name="keterangan_in" placeholder="cth: terlupa clock in..."
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Keterangan Out (Pilihan)
+                    </label>
+                    <input type="text" name="keterangan_out" placeholder="cth: balik awal, urusan luar..."
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
             </div>
 
             <div>
@@ -360,12 +369,21 @@
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                    Keterangan Staf
-                </label>
-                <input type="text" id="edit_keterangan_staff" name="keterangan_staff"
-                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Keterangan In
+                    </label>
+                    <input type="text" id="edit_keterangan_in" name="keterangan_in" placeholder="cth: terlupa clock in..."
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                        Keterangan Out
+                    </label>
+                    <input type="text" id="edit_keterangan_out" name="keterangan_out" placeholder="cth: balik awal..."
+                           class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
             </div>
 
             <div>
@@ -453,7 +471,8 @@
         document.getElementById('edit_check_out').value = rec.check_out || '';
 
         // Notes
-        document.getElementById('edit_keterangan_staff').value = rec.keterangan_staff || '';
+        document.getElementById('edit_keterangan_in').value = rec.keterangan_in || '';
+        document.getElementById('edit_keterangan_out').value = rec.keterangan_out || '';
         document.getElementById('edit_keterangan_admin').value = rec.keterangan_admin || 'Disahkan oleh pentadbir';
 
         document.getElementById('editAttendanceForm').action = `/admin/attendance/${rec.id}`;

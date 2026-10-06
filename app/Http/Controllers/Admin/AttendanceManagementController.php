@@ -74,6 +74,8 @@ class AttendanceManagementController extends Controller
             'date' => ['required', 'date_format:Y-m-d'],
             'check_in' => ['required', 'date_format:H:i'],
             'check_out' => ['nullable', 'date_format:H:i'],
+            'keterangan_in' => ['nullable', 'string', 'max:255'],
+            'keterangan_out' => ['nullable', 'string', 'max:255'],
             'keterangan_staff' => ['nullable', 'string', 'max:255'],
             'keterangan_admin' => ['nullable', 'string', 'max:255'],
         ], [
@@ -93,13 +95,17 @@ class AttendanceManagementController extends Controller
         // Calculate period
         $period = Attendance::calculatePeriod($checkIn, $checkOut);
 
+        $keteranganIn = $validated['keterangan_in'] ?? $validated['keterangan_staff'] ?? null;
+        $keteranganOut = $validated['keterangan_out'] ?? null;
+
         Attendance::create([
             'id' => $customId,
             'staff_id' => $staffId,
             'check_in' => $checkIn,
             'check_out' => $checkOut,
             'date' => $date,
-            'keterangan_staff' => $validated['keterangan_staff'] ?? null,
+            'keterangan_in' => $keteranganIn,
+            'keterangan_out' => $keteranganOut,
             'keterangan_admin' => $validated['keterangan_admin'] ?? 'Kemasukan manual oleh admin',
             'period' => $period,
         ]);
@@ -120,6 +126,8 @@ class AttendanceManagementController extends Controller
             'date' => ['required', 'date_format:Y-m-d'],
             'check_in' => ['required'],
             'check_out' => ['nullable'],
+            'keterangan_in' => ['nullable', 'string', 'max:255'],
+            'keterangan_out' => ['nullable', 'string', 'max:255'],
             'keterangan_staff' => ['nullable', 'string', 'max:255'],
             'keterangan_admin' => ['nullable', 'string', 'max:255'],
         ]);
@@ -134,14 +142,25 @@ class AttendanceManagementController extends Controller
         // Automatic re-calculation of period
         $period = Attendance::calculatePeriod($checkIn, $checkOut);
 
-        $attendance->update([
+        $updateData = [
             'date' => $validated['date'],
             'check_in' => $checkIn,
             'check_out' => $checkOut,
-            'keterangan_staff' => $validated['keterangan_staff'] ?? null,
             'keterangan_admin' => $validated['keterangan_admin'] ?? null,
             'period' => $period,
-        ]);
+        ];
+
+        if (array_key_exists('keterangan_in', $validated)) {
+            $updateData['keterangan_in'] = $validated['keterangan_in'];
+        } elseif (array_key_exists('keterangan_staff', $validated)) {
+            $updateData['keterangan_in'] = $validated['keterangan_staff'];
+        }
+
+        if (array_key_exists('keterangan_out', $validated)) {
+            $updateData['keterangan_out'] = $validated['keterangan_out'];
+        }
+
+        $attendance->update($updateData);
 
         return redirect()->route('admin.attendance.index')
             ->with('success', "Rekod kehadiran {$attendance->id} berjaya dikemas kini. Tempoh masa dikira semula: ".($period ?? 'Sesi Aktif'));

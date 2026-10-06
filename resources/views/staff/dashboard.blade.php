@@ -135,7 +135,7 @@
                     </form>
                 @else
                     <!-- Clock Out Form -->
-                    <form action="{{ route('staff.attendance.clock_out') }}" method="POST" onsubmit="return confirm('Adakah anda pasti untuk tamatkan sesi kerja (Clock Out)?')" class="mt-6 space-y-6">
+                    <form id="clockOutForm" action="{{ route('staff.attendance.clock_out') }}" method="POST" class="mt-6 space-y-6">
                         @csrf
 
                         <!-- 1. Circular Clock Out Button (Atas) -->
@@ -144,7 +144,10 @@
                                 <!-- Pulsing ambient glow -->
                                 <div class="absolute -inset-3 bg-gradient-to-r from-rose-500 to-red-400 rounded-full blur-lg opacity-40 group-hover:opacity-70 transition duration-500 group-hover:scale-105 animate-pulse"></div>
 
-                                <button type="submit" 
+                                <button type="button" 
+                                        data-clock_out-trigger
+                                        aria-haspopup="dialog"
+                                        aria-controls="clock_out-confirm-dialog"
                                         class="relative w-44 h-44 rounded-full bg-gradient-to-tr from-rose-600 via-rose-500 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-extrabold shadow-2xl shadow-rose-600/40 flex flex-col items-center justify-center gap-2 transition-all duration-300 transform group-hover:scale-105 active:scale-95 cursor-pointer border-4 border-white/40 ring-4 ring-rose-500/20">
                                     <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-xs">
                                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,15 +200,7 @@
                                    name="keterangan_out" 
                                    placeholder="cth: tugasan harian selesai, keluar rehat makan, urusan luar siap..."
                                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all">
-                            <button type="button"
-                                data-clock_out-trigger
-                                aria-haspopup="dialog"
-                                aria-controls="logout-confirm-dialog"
-                                title="Log Keluar"
-                                class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors">
-                                Test
-                            </button>
-                            </div>
+                        </div>
                     </form>
 
                     <!-- 3. Info Box Active Session (Bawah Button) -->

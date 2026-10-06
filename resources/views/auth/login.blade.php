@@ -89,11 +89,16 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <input id="remember" type="checkbox"
-                               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded">
-                        <label for="remember" class="ml-2 block text-xs text-slate-600">
+                               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-slate-300 rounded cursor-pointer">
+                        <label for="remember" class="ml-2 block text-xs text-slate-600 cursor-pointer select-none">
                             Remember me
                         </label>
                     </div>
+
+                    <a href="{{ route('password.request') }}"
+                       class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline transition-colors">
+                        Lupa kata laluan?
+                    </a>
                 </div>
 
                 <div>
@@ -111,7 +116,7 @@
                 </p>
                 <div class="grid grid-cols-2 gap-2.5">
                     <button type="button" 
-                            onclick="fillCredentials('HR_01', 'password123')"
+                            onclick="fillCredentials('AD_01', 'password123')"
                             class="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 hover:border-indigo-400 bg-slate-50 hover:bg-indigo-50/50 transition-all text-left group cursor-pointer">
                         <span class="text-xs font-bold text-slate-800 group-hover:text-indigo-600 flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-violet-500"></span> Admin (HR)

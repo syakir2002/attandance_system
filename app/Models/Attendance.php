@@ -66,6 +66,15 @@ class Attendance extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'keterangan_staff',
+    ];
+
+    /**
      * Mutator to map legacy keterangan_staff to keterangan_in.
      */
     public function setKeteranganStaffAttribute(?string $value): void
@@ -74,11 +83,29 @@ class Attendance extends Model
     }
 
     /**
-     * Accessor for keterangan_staff fallback to keterangan_in.
+     * Accessor for keterangan_staff.
+     * Merges keterangan_in and keterangan_out with '|' when displaying under a single staff note column.
      */
     public function getKeteranganStaffAttribute(): ?string
     {
-        return $this->attributes['keterangan_in'] ?? ($this->attributes['keterangan_staff'] ?? null);
+        $in = trim((string) ($this->attributes['keterangan_in'] ?? ''));
+        $out = trim((string) ($this->attributes['keterangan_out'] ?? ''));
+
+        if ($in !== '' && $out !== '') {
+            return "{$in} | {$out}";
+        }
+
+        if ($in !== '') {
+            return $in;
+        }
+
+        if ($out !== '') {
+            return $out;
+        }
+
+        $legacy = trim((string) ($this->attributes['keterangan_staff'] ?? ''));
+
+        return $legacy !== '' ? $legacy : null;
     }
 
     /**
