@@ -313,15 +313,16 @@
     function updateClock() {
         const now = new Date();
         
-        // Time formatting
-        let hours = now.getHours();
+        // Time formatting (12-hour format)
+        let rawHours = now.getHours();
         let minutes = now.getMinutes();
         let seconds = now.getSeconds();
         
-        const period = hours >= 12 ? 'PM' : 'AM';
+        const period = rawHours >= 12 ? 'PM' : 'AM';
+        const hours12 = rawHours % 12 || 12;
         
         // Pad with zeros
-        document.getElementById('liveClockHours').innerText = String(hours).padStart(2, '0');
+        document.getElementById('liveClockHours').innerText = String(hours12).padStart(2, '0');
         document.getElementById('liveClockMinutes').innerText = String(minutes).padStart(2, '0');
         document.getElementById('liveClockSeconds').innerText = String(seconds).padStart(2, '0');
         document.getElementById('liveClockPeriod').innerText = period;
