@@ -6,15 +6,15 @@
 @section('content')
 <div class="attendance-summary-page space-y-6">
     <!-- Header & Action Toolbar -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs">
         <div>
             <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Laporan Ringkasan Bulanan Staf</h2>
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Format ringkasan keseluruhan jam bekerja dan hari hadir mengikut format borang fizikal rekod kehadiran.</p>
         </div>
 
-        <div class="flex items-center gap-3">
-                <a href="{{ route('admin.attendance.summary', ['month' => $selectedMonth, 'year' => $selectedYear, 'staff_id' => $selectedStaffId, 'download' => 'pdf']) }}"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors cursor-pointer">
+        <div class="flex items-center gap-3 shrink-0">
+            <a href="{{ route('admin.attendance.summary', ['month' => $selectedMonth, 'year' => $selectedYear, 'staff_id' => $selectedStaffId, 'download' => 'pdf']) }}"
+               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors cursor-pointer shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                 </svg>
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Filter Form -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs">
         <form action="{{ route('admin.attendance.summary') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
             <div>
                 <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Bulan</label>
@@ -122,8 +122,8 @@
     </div>
 
     <!-- Ringkasan Staf Table (Format Rekod Kehadiran Fizikal) -->
-    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-sm font-bold text-slate-900">
                 Ringkasan Prestasi Kehadiran Bulanan ({{ \Carbon\Carbon::create($selectedYear, $selectedMonth, 1)->locale('ms')->translatedFormat('F Y') }})
             </h3>
@@ -195,13 +195,14 @@
 
                         <!-- Expandable Detailed Daily Log per Staff -->
                         <tr id="detail_{{ $row['staff']->staff_id }}" class="hidden bg-slate-50/80">
-                            <td colspan="8" class="p-4 sm:p-6">
-                                <div class="bg-white p-4 rounded-2xl border border-slate-200">
+                            <td colspan="8" class="p-3 sm:p-6">
+                                <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
                                     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3">
                                         Log Terperinci Kehadiran: {{ mb_strtoupper($row['staff']->name, 'UTF-8') }} ({{ $row['staff']->staff_id }})
                                     </h4>
 
-                                    <table class="w-full text-xs text-left">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-xs text-left">
                                         <thead>
                                             <tr class="border-b border-slate-200 text-slate-500 font-bold pb-1 uppercase text-[10px]">
                                                 <th class="py-2 px-3">Tarikh</th>
@@ -249,6 +250,7 @@
                                             @endforelse
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

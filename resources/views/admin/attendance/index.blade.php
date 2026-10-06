@@ -6,7 +6,7 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header & Action Toolbar -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs">
         <div>
             <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Semua Rekod Kehadiran Staf</h2>
             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Pantau, tapis, dan lakukan pembetulan manual bagi rekod kehadiran.</p>
@@ -14,7 +14,7 @@
 
         <button type="button" 
                 onclick="openModal('addAttendanceModal')"
-                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
             </svg>
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Filter Form -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs">
         <form action="{{ route('admin.attendance.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
             <!-- Filter 1: Staf -->
             <div>
@@ -92,8 +92,8 @@
     </div>
 
     <!-- Attendance Table -->
-    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Senarai Rekod Kehadiran ({{ $records->total() }} Jumlah Rekod)
             </span>
@@ -224,14 +224,14 @@
 </div>
 
 <!-- Modal 1: Tambah Kehadiran Manual -->
-<div id="addAttendanceModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+<div id="addAttendanceModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-8 shadow-2xl border border-slate-200 max-h-[calc(100vh-2rem)] overflow-y-auto">
         <div class="flex items-center justify-between pb-4 border-b border-slate-100">
             <div>
                 <h3 class="text-lg font-bold text-slate-900">Tambah Kehadiran Manual</h3>
                 <p class="text-xs text-slate-500">Bagi staf yang terlupa clock in/out atau masalah teknikal.</p>
             </div>
-            <button type="button" onclick="closeModal('addAttendanceModal')" class="text-slate-400 hover:text-slate-600">
+            <button type="button" onclick="closeModal('addAttendanceModal')" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -261,7 +261,7 @@
                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
                         Masa Check In *
@@ -309,14 +309,14 @@
 </div>
 
 <!-- Modal 2: Sunting Kehadiran (Correction) -->
-<div id="editAttendanceModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200">
+<div id="editAttendanceModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-8 shadow-2xl border border-slate-200 max-h-[calc(100vh-2rem)] overflow-y-auto">
         <div class="flex items-center justify-between pb-4 border-b border-slate-100">
             <div>
                 <h3 class="text-lg font-bold text-slate-900">Pembetulan Kehadiran</h3>
                 <p class="text-xs text-slate-500" id="editAttendanceSubtitle"></p>
             </div>
-            <button type="button" onclick="closeModal('editAttendanceModal')" class="text-slate-400 hover:text-slate-600">
+            <button type="button" onclick="closeModal('editAttendanceModal')" class="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -342,7 +342,7 @@
                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
                         Masa Check In *

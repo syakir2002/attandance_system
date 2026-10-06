@@ -4,11 +4,11 @@
 @section('page_title', 'Ringkasan & Dashboard Utama')
 
 @section('content')
-<div class="space-y-8">
+<div class="space-y-6 sm:space-y-8">
     <!-- Top KPI Stat Cards (4 Cards) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <!-- 1. Jumlah Staf -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
             <div>
                 <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Jumlah Staf</span>
                 <div class="text-3xl font-extrabold text-slate-900 font-mono-num mt-1">{{ $totalStaff }}</div>
@@ -22,7 +22,7 @@
         </div>
 
         <!-- 2. Sedang Clocked In -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
             <div>
                 <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider block flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -39,7 +39,7 @@
         </div>
 
         <!-- 3. Belum Clock In Hari Ini -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
             <div>
                 <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider block">Belum Clock In</span>
                 <div class="text-3xl font-extrabold text-amber-700 font-mono-num mt-1">{{ $notClockedInCount }}</div>
@@ -53,7 +53,7 @@
         </div>
 
         <!-- 4. Jumlah Sesi Kehadiran Hari Ini -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
             <div>
                 <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Jumlah Sesi Hari Ini</span>
                 <div class="text-3xl font-extrabold text-slate-900 font-mono-num mt-1">{{ $totalSessionsToday }}</div>
@@ -67,9 +67,9 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <!-- Live Active Clocked In Staff (1 Col) -->
-        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                     <div class="flex items-center gap-2">
@@ -125,13 +125,13 @@
         </div>
 
         <!-- Today's Attendance Sessions Table (2 Cols) -->
-        <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div class="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div class="px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
                 <div>
                     <h3 class="text-base font-bold text-slate-900">Rekod Kehadiran Hari Ini</h3>
                     <p class="text-xs text-slate-500 mt-0.5">Semua sesi kehadiran pada tarikh {{ \Carbon\Carbon::parse($today)->isoFormat('dddd, D MMMM Y') }}</p>
                 </div>
-                <a href="{{ route('admin.attendance.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-700">
+                <a href="{{ route('admin.attendance.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 shrink-0">
                     Lihat Semua &rarr;
                 </a>
             </div>
