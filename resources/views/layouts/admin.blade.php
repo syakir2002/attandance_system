@@ -67,6 +67,14 @@
                 <span>Profil Saya</span>
             </a>
 
+            <a href="{{ route('admin.calendar.index') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.calendar.*') ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-900/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span>Calendar</span>
+            </a>
+
             <div class="pt-4 px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Kehadiran</div>
 
             <a href="{{ route('admin.attendance.index') }}" 
@@ -199,6 +207,7 @@
     </div>
 </div>
 @include('layouts.logout-confirmation')
+@include('layouts.action-confirmation')
 
 @push('styles')
 <style>
@@ -247,7 +256,7 @@
         }
         #admin-sidebar-toggle {
             display: inline-flex !important;
-        }
+        }   
         #admin-sidebar-close {
             display: inline-flex !important;
         }

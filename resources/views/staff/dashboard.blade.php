@@ -3,6 +3,10 @@
 @section('title', 'Dashboard Kehadiran - Portal Staf')
 
 @section('content')
+@php
+$time = now()->isAfter('9:30');
+$clock_out = now()->isBefore('5:15')
+@endphp
 <div class="space-y-6">
     <!-- Top Welcome & Real-Time Clock Banner (Compact) -->
     <div class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-md relative overflow-hidden">
@@ -130,7 +134,7 @@
                                    id="keterangan_in" 
                                    name="keterangan_in" 
                                    placeholder="cth: kerja lebih masa, lawatan tapak, perjumpaan pelanggan..."
-                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all" {{$time ? 'required' : ''}}>
                         </div>
                     </form>
                 @else
@@ -199,7 +203,8 @@
                                    id="keterangan_out" 
                                    name="keterangan_out" 
                                    placeholder="cth: tugasan harian selesai, keluar rehat makan, urusan luar siap..."
-                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all">
+                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all"
+                                   {{$clock_out ? 'required' : ''}}>
                         </div>
                     </form>
 

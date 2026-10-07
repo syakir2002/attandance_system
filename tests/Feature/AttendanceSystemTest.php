@@ -403,6 +403,38 @@ test('admin can add manual attendance and correct records recalculating period',
     expect($updated->period)->toBe('08:00:00');
 });
 
+test('admin can delete attendance record and views render modern action confirmation modal', function () {
+    $attendance = Attendance::create([
+        'id' => 'STF_01-20260210-01',
+        'staff_id' => 'STF_01',
+        'date' => '2026-02-10',
+        'check_in' => '08:30:00',
+        'check_out' => '17:30:00',
+        'period' => '09:00:00',
+    ]);
+
+    // Check attendance index view
+    $indexResponse = $this->actingAs($this->admin)->get(route('admin.attendance.index'));
+    $indexResponse->assertOk();
+    $indexResponse->assertSee('action-confirm-dialog', false);
+    $indexResponse->assertSee('data-confirm=', false);
+    $indexResponse->assertDontSee('onsubmit="return confirm', false);
+
+    // Delete attendance
+    $deleteResponse = $this->actingAs($this->admin)
+        ->delete(route('admin.attendance.destroy', $attendance->id));
+    $deleteResponse->assertRedirect(route('admin.attendance.index'));
+    expect(Attendance::find('STF_01-20260210-01'))->toBeNull();
+});
+
+test('admin staff index renders modern action confirmation modal instead of onsubmit confirm', function () {
+    $response = $this->actingAs($this->admin)->get(route('admin.staff.index'));
+    $response->assertOk();
+    $response->assertSee('action-confirm-dialog', false);
+    $response->assertSee('data-confirm=', false);
+    $response->assertDontSee('onsubmit="return confirm', false);
+});
+
 test('admin can view monthly summary report', function () {
     User::create([
         'staff_id' => 'STF_02',

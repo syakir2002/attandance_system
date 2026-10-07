@@ -134,4 +134,5 @@
     </footer>
 </div>
 @include('layouts.logout-confirmation')
+@include('layouts.action-confirmation')
 @endsection

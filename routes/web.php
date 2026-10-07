@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Staff\AttendanceController as StaffAttendanceController;
 use App\Http\Controllers\Staff\ProfileController as StaffProfileController;
+use App\Http\Controllers\Admin\CalendarController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +58,7 @@ Route::prefix('admin')
         Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile.show');
         Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password');
+        Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
 
         // Staff CRUD
         Route::get('/staff', [StaffManagementController::class, 'index'])->name('staff.index');

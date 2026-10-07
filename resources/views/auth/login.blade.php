@@ -17,10 +17,10 @@
             </div>
         </div>
         <h2 class="mt-4 text-center text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Staff Attendance System
+            Sistem E-Kehadiran
         </h2>
         <p class="mt-2 text-center text-sm text-slate-400">
-            Staff Attendance Management & Records System
+            Pengurusan Kehadiran & Sistem Rekod Staf
         </p>
     </div>
 
@@ -104,7 +104,7 @@
                 <div>
                     <button type="submit"
                             class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all cursor-pointer">
-                        Login 
+                        Log Masuk 
                     </button>
                 </div>
             </form>

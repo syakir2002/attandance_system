@@ -159,10 +159,10 @@
                                     <div class="text-[11px] text-slate-500 font-mono-num">{{ $rec->staff_id }}</div>
                                 </td>
                                 <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
-                                    {{ $rec->check_in }}
+                                    {{ date('h:i A', strtotime($rec->check_in ))}}
                                 </td>
                                 <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
-                                    {{ $rec->check_out ?? '-' }}
+                                    {{ $rec->check_out ? date('h:i A', strtotime($rec->check_out)) :  '-'}}
                                 </td>
                                 <td class="py-3.5 px-5 font-mono-num text-xs font-bold text-slate-900">
                                     {{ $rec->period ?? '-' }}
@@ -189,7 +189,11 @@
                                         </button>
 
                                         <!-- Delete Button -->
-                                        <form action="{{ route('admin.attendance.destroy', $rec->id) }}" method="POST" onsubmit="return confirm('Adakah anda pasti untuk memadam rekod kehadiran {{ $rec->id }}?')">
+                                        <form action="{{ route('admin.attendance.destroy', $rec->id) }}" 
+                                              method="POST"
+                                              data-confirm="Adakah anda pasti untuk memadam rekod kehadiran #{{ $rec->id }} ({{ $rec->user ? mb_strtoupper($rec->user->name, 'UTF-8') : $rec->staff_id }} - {{ $rec->date }})? Tindakan ini tidak boleh diundur."
+                                              data-confirm-title="Padam Rekod Kehadiran?"
+                                              data-confirm-btn="Padam Rekod">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" 

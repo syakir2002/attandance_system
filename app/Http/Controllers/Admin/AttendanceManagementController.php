@@ -72,8 +72,8 @@ class AttendanceManagementController extends Controller
         $validated = $request->validate([
             'staff_id' => ['required', 'exists:user,staff_id'],
             'date' => ['required', 'date_format:Y-m-d'],
-            'check_in' => ['required', 'date_format:H:i'],
-            'check_out' => ['nullable', 'date_format:H:i'],
+            'check_in' => ['required', 'date_format:H:i:s'],
+            'check_out' => ['nullable', 'date_format:H:i:s'],
             'keterangan_in' => ['nullable', 'string', 'max:255'],
             'keterangan_out' => ['nullable', 'string', 'max:255'],
             'keterangan_staff' => ['nullable', 'string', 'max:255'],
@@ -83,20 +83,45 @@ class AttendanceManagementController extends Controller
             'date.required' => 'Sila pilih tarikh.',
             'check_in.required' => 'Sila masukkan masa check in.',
         ]);
+       
 
         $staffId = $validated['staff_id'];
         $date = $validated['date'];
-        $checkIn = $validated['check_in'].':00';
-        $checkOut = ! empty($validated['check_out']) ? $validated['check_out'].':00' : null;
+        $checkIn = $validated['check_in'];
+        $checkOut = ! empty($validated['check_out']) ? $validated['check_out'] : null;
 
         // Generate Custom ID: {staff_id}-{YYYYMMDD}-{session_number}
         $customId = Attendance::generateCustomId($staffId, $date);
 
         // Calculate period
         $period = Attendance::calculatePeriod($checkIn, $checkOut);
-
+        
         $keteranganIn = $validated['keterangan_in'] ?? $validated['keterangan_staff'] ?? null;
         $keteranganOut = $validated['keterangan_out'] ?? null;
+
+        $isOverlapping = Attendance::where('staff_id',$staffId)
+                                    ->where('date',$date)
+                                    ->where(function($query) use ($checkIn, $checkOut){
+                                        $query->where('check_in', '<', $checkIn)
+                                              ->where('check_out', '>', $checkOut);
+                                    })
+                                    ->exists();
+        
+        $hasOpenSession = Attendance::where('staff_id',$staffId)
+                                    ->where('date',$date)
+                                    ->whereNull('check_out')
+                                    ->exists();
+
+        if($hasOpenSession){
+            return redirect()->route('admin.attendance.index')
+                ->with('error', "Kemasukkan gagal.");
+        }
+    
+        if($isOverlapping)
+        {
+            return redirect()->route('admin.attendance.index')
+                ->with('error', "Kemasukkan gagal.");
+        }
 
         Attendance::create([
             'id' => $customId,

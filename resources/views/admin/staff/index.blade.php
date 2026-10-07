@@ -110,7 +110,11 @@
 
                                     <!-- Delete Button -->
                                     @if(auth()->id() !== $user->staff_id)
-                                        <form action="{{ route('admin.staff.destroy', $user->staff_id) }}" method="POST" onsubmit="return confirm('Adakah anda pasti untuk memadam staf {{ $user->staff_id }} ({{ mb_strtoupper($user->name, 'UTF-8') }})?')">
+                                        <form action="{{ route('admin.staff.destroy', $user->staff_id) }}" 
+                                              method="POST"
+                                              data-confirm="Adakah anda pasti untuk memadam staf {{ $user->staff_id }} ({{ mb_strtoupper($user->name, 'UTF-8') }})? Tindakan ini tidak boleh diundur."
+                                              data-confirm-title="Padam Staf?"
+                                              data-confirm-btn="Padam Staf">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" 
