@@ -43,6 +43,7 @@ test('admin layout renders responsive collapsible sidebar and mobile toggle cont
     $response->assertSee(route('admin.dashboard'));
     $response->assertSee(route('admin.staff.index'));
     $response->assertSee(route('admin.profile.show'));
+    $response->assertSee(route('admin.calendar.index'));
     $response->assertSee(route('admin.attendance.index'));
     $response->assertSee(route('admin.attendance.summary'));
 });
@@ -58,6 +59,7 @@ test('all admin pages include mobile responsive sidebar controls', function (str
     'admin.dashboard',
     'admin.staff.index',
     'admin.profile.show',
+    'admin.calendar.index',
     'admin.attendance.index',
     'admin.attendance.summary',
 ]);

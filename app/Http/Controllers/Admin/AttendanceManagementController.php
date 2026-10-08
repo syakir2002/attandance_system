@@ -83,7 +83,6 @@ class AttendanceManagementController extends Controller
             'date.required' => 'Sila pilih tarikh.',
             'check_in.required' => 'Sila masukkan masa check in.',
         ]);
-       
 
         $staffId = $validated['staff_id'];
         $date = $validated['date'];
@@ -95,32 +94,31 @@ class AttendanceManagementController extends Controller
 
         // Calculate period
         $period = Attendance::calculatePeriod($checkIn, $checkOut);
-        
+
         $keteranganIn = $validated['keterangan_in'] ?? $validated['keterangan_staff'] ?? null;
         $keteranganOut = $validated['keterangan_out'] ?? null;
 
-        $isOverlapping = Attendance::where('staff_id',$staffId)
-                                    ->where('date',$date)
-                                    ->where(function($query) use ($checkIn, $checkOut){
-                                        $query->where('check_in', '<', $checkIn)
-                                              ->where('check_out', '>', $checkOut);
-                                    })
-                                    ->exists();
-        
-        $hasOpenSession = Attendance::where('staff_id',$staffId)
-                                    ->where('date',$date)
-                                    ->whereNull('check_out')
-                                    ->exists();
+        $isOverlapping = Attendance::where('staff_id', $staffId)
+            ->where('date', $date)
+            ->where(function ($query) use ($checkIn, $checkOut) {
+                $query->where('check_in', '<', $checkIn)
+                    ->where('check_out', '>', $checkOut);
+            })
+            ->exists();
 
-        if($hasOpenSession){
+        $hasOpenSession = Attendance::where('staff_id', $staffId)
+            ->where('date', $date)
+            ->whereNull('check_out')
+            ->exists();
+
+        if ($hasOpenSession) {
             return redirect()->route('admin.attendance.index')
-                ->with('error', "Kemasukkan gagal.");
+                ->with('error', 'Kemasukkan gagal.');
         }
-    
-        if($isOverlapping)
-        {
+
+        if ($isOverlapping) {
             return redirect()->route('admin.attendance.index')
-                ->with('error', "Kemasukkan gagal.");
+                ->with('error', 'Kemasukkan gagal kerana terdapat session yang belum di clock_out.');
         }
 
         Attendance::create([
