@@ -103,7 +103,7 @@
                         <span class="text-xs font-bold text-slate-800 group-hover:text-indigo-600 flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-violet-500"></span> Admin (HR)
                         </span>
-                        <span class="text-[11px] text-slate-500 font-mono-num">HR_01</span>
+                        <span class="text-[11px] text-slate-500 font-mono-num">AD_01</span>
                     </button>
 
                     <button type="button" 
