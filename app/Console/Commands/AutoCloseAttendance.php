@@ -27,7 +27,7 @@ class AutoCloseAttendance extends Command
      */
     public function handle(): int
     {
-        $cutoffTime = Carbon::createFromTimeString('19:00:00');
+        $cutoffTime = Carbon::createFromTimeString('24:00:00');
         $defaultCheckout = '17:30:00';
         $now = now();
 

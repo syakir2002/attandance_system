@@ -237,7 +237,7 @@
                                                         @endif
                                                         <td class="py-2 px-3 text-indigo-600 font-bold border-b-2 border-slate-200">{{ $rec->id }}</td>
                                                         <td class="py-2 px-3 text-slate-700 border-b-2 border-slate-200">{{ date('h:i A',strtotime($rec->check_in)) }}</td>
-                                                        <td class="py-2 px-3 text-slate-700 border-b-2 border-slate-200">{{ date('h:i A', strtotime($rec->check_out)) ?? '-' }}</td>
+                                                        <td class="py-2 px-3 text-slate-700 border-b-2 border-slate-200">{{ $rec->check_out ? date('h:i A', strtotime($rec->check_out)) : '-'}}</td>
                                                         <td class="py-2 px-3 font-bold text-slate-900 border-b-2 border-slate-200">{{ $rec->period ?? '-' }}</td>
                                                         <td class="py-2 px-3 font-sans text-slate-600 border-b-2 border-slate-200">{{ $rec->keterangan_staff ?: '-' }}</td>
                                                         <td class="py-2 px-3 font-sans text-slate-600 border-b-2 border-slate-200">{{ $rec->keterangan_admin ?: '-' }}</td>

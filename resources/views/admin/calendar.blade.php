@@ -320,8 +320,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-slate-900">Tambah Tugasan / Acara Baharu</h3>
-                    <p class="text-xs text-slate-500">Penyimpanan terus ke dalam jadual callendar_info</p>
+                    <h3 class="text-base font-bold text-slate-900">Tambah Tugasan / Acara Baharu</h3>s
                 </div>
             </div>
             <button type="button" 
@@ -601,6 +600,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnDeleteEvent = document.getElementById('btn-delete-event');
     const modalDetail = document.getElementById('modal-event-detail');
     const modalNewTask = document.getElementById('modal-new-task');
+    const start_time = document.getElementById('task-start');
+    const end_time = document.getElementById('task-end');
+
+    if(start_time && end_time)
+    {
+        start_time.addEventListener('change', function(){
+            end_time.min = this.value;
+
+            if(end_time.value && end_time.value<this.value){
+            end_time.value='';
+            }
+        });
+    }
 
     // Initialize FullCalendar
     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -667,38 +679,38 @@ document.addEventListener('DOMContentLoaded', function () {
             btnDeleteEvent.classList.remove('hidden');
             btnDeleteEvent.classList.add('inline-flex');
 
-            const isBlockStyle = props.display_style === 'block';
-            const styleBadge = isBlockStyle
-                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                     <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-                     Sorotan Penuh (Block)
-                   </span>`
-                : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                     <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-                     Titik Ringkas (Dot)
-                   </span>`;
+            // const isBlockStyle = props.display_style === 'block';
+            // const styleBadge = isBlockStyle
+            //     ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+            //          <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+            //          Sorotan Penuh (Block)
+            //        </span>`
+            //     : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+            //          <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+            //          Titik Ringkas (Dot)
+            //        </span>`;
 
-            if (props.status === 1) {
-                statusBadgeContainer.innerHTML = `
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                            Public — Boleh Dilihat Oleh Semua Staf
-                        </span>
-                        ${styleBadge}
-                    </div>
-                `;
-            } else {
-                statusBadgeContainer.innerHTML = `
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                            Private — Kegunaan Peribadi Pentadbir
-                        </span>
-                        ${styleBadge}
-                    </div>
-                `;
-            }
+            // if (props.status === 1) {
+            //     statusBadgeContainer.innerHTML = `
+            //         <div class="flex flex-wrap items-center gap-2">
+            //             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            //                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+            //                 Public — Boleh Dilihat Oleh Semua Staf
+            //             </span>
+            //             ${styleBadge}
+            //         </div>
+            //     `;
+            // } else {
+            //     statusBadgeContainer.innerHTML = `
+            //         <div class="flex flex-wrap items-center gap-2">
+            //             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+            //                 <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+            //                 Private — Kegunaan Peribadi Pentadbir
+            //             </span>
+            //             ${styleBadge}
+            //         </div>
+            //     `;
+            // }
 
             if (props.description && props.description.trim() !== '') {
                 extraContainer.innerHTML = `

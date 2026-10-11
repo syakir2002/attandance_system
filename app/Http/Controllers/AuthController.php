@@ -42,7 +42,7 @@ class AuthController extends Controller
 
         $loginInput = trim($credentials['login']);
         $password = $credentials['password'];
-
+        
         // Email comparison follows the database collation; Staff ID must match exactly.
         $user = User::where('email', $loginInput)->first();
 

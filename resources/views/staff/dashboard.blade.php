@@ -5,7 +5,13 @@
 @section('content')
 @php
 $time = now()->isAfter('9:30');
-$clock_out = now()->isBefore('5:15')
+$time_now1 = now()->isAfter('24:00');
+$time_now2 = now()->isBefore('7:00');
+$button_disable= false;
+
+if($time_now1 === true && $time_now2===true){
+    $button_disable=true;
+}
 @endphp
 <div class="space-y-6">
     <!-- Top Welcome & Real-Time Clock Banner (Compact) -->
@@ -83,7 +89,7 @@ $clock_out = now()->isBefore('5:15')
                                 <div class="absolute -inset-3 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full blur-lg opacity-40 group-hover:opacity-70 transition duration-500 group-hover:scale-105 animate-pulse"></div>
 
                                 <button type="submit" 
-                                        class="relative w-44 h-44 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold shadow-2xl shadow-emerald-600/40 flex flex-col items-center justify-center gap-2 transition-all duration-300 transform group-hover:scale-105 active:scale-95 cursor-pointer border-4 border-white/40 ring-4 ring-emerald-500/20">
+                                        class="relative w-44 h-44 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold shadow-2xl shadow-emerald-600/40 flex flex-col items-center justify-center gap-2 transition-all duration-300 transform group-hover:scale-105 active:scale-95 cursor-pointer border-4 border-white/40 ring-4 ring-emerald-500/20" {{$button_disable ? 'disabled' : ''}}>
                                     <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-xs">
                                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -203,8 +209,7 @@ $clock_out = now()->isBefore('5:15')
                                    id="keterangan_out" 
                                    name="keterangan_out" 
                                    placeholder="cth: tugasan harian selesai, keluar rehat makan, urusan luar siap..."
-                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all"
-                                   {{$clock_out ? 'required' : ''}}>
+                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:bg-white transition-all">
                         </div>
                     </form>
 

@@ -270,7 +270,7 @@
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
                         Masa Check In *
                     </label>
-                    <input type="time" name="check_in" required step="1"
+                    <input type="time" name="check_in" required step="1" id="task_start_time"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
 
@@ -278,7 +278,7 @@
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
                         Masa Check Out
                     </label>
-                    <input type="time" name="check_out" step="1"
+                    <input type="time" name="check_out" step="1" id="task_end_time"
                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <span class="text-[10px] text-slate-400 mt-0.5 block">Kosongkan jika masih bertugas</span>
                 </div>
@@ -445,12 +445,70 @@
     document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById('staffSearchInput');
 
+        const timeMula = document.getElementById('task_start_time');
+        const timeTamat = document.getElementById('task_end_time');
+        if(timeMula && timeTamat){
+            timeMula.addEventListener('change',function(){
+                let valMula = this.value;
+                if(!valMula) return;
+
+                const to24 = (timeStr) => {
+
+                        if(!timeStr) return '';
+                    
+                        let [time,modifier] = timeStr.split(' ');
+                        let [hours, minutes] = time.split(':');
+                        if(hours === '12'){
+                            hours = '00';
+                        }
+                        if(modifier === 'PM'){
+                            hours = parseInt(hours, 10) +12;
+                        }
+
+                        return `${String(hours).padStart(2, '0')}:${minutes}`;if(!timeStr.includes('AM') && !timeStr.includes('PM')){
+                    }
+                    return timeStr.substring(0,5);
+                }
+
+                const semakMasa = () =>{
+                     let formatMula = to24(valMula);
+                    let formatTamat = to24(timeTamat.value);
+
+                    if(formatMula && formatTamat && formatTamat <=formatMula){
+                        console.log('masuk')
+                        timeTamat.value = '';
+                    }
+                }
+                timeMula.addEventListener('change', semakMasa);
+                timeTamat.addEventListener('change', semakMasa);
+               
+            });
+        }
+
         if (input) {
             input.addEventListener('input', syncStaffFilterSelection);
             input.addEventListener('change', syncStaffFilterSelection);
             syncStaffFilterSelection();
         }
     });
+
+    // // function convertTo24Hour(timeStr){
+    // //     if(!timeStr) return '';
+    // //     if(!timeStr.includes('AM') && !timeStr.includes('PM')){
+    // //         return timeStr.substring(0,5);
+    // //     }
+
+    // //     let [time,modifier] = timeStr.split('');
+    // //     let [hour, minutes] = time.split(':');
+    // //     if(hours === '12'){
+    // //         hours = '00';
+    // //     }
+    // //     if(modified === 'PM'){
+    // //         hours = parseInt(hours, 10) +12;
+    // //     }
+
+    // //     return `${String(hours).padStart(2, '0')}:${minutes}`;
+    // // }
 
     function openModal(id) {
         document.getElementById(id).classList.remove('hidden');
