@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\StaffManagementController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Staff\AttendanceController as StaffAttendanceController;
+use App\Http\Controllers\Staff\CalendarController as StaffCalendarController;
 use App\Http\Controllers\Staff\ProfileController as StaffProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,8 @@ Route::prefix('staff')
         Route::post('/attendance/clock-in', [StaffAttendanceController::class, 'clockIn'])->name('attendance.clock_in');
         Route::post('/attendance/clock-out', [StaffAttendanceController::class, 'clockOut'])->name('attendance.clock_out');
         Route::get('/attendance', [StaffAttendanceController::class, 'history'])->name('attendance.history');
+        Route::get('/calendar', [StaffCalendarController::class, 'index'])->name('calendar.index');
+        Route::get('/calendar/events', [StaffCalendarController::class, 'events'])->name('calendar.events');
         Route::get('/profile', [StaffProfileController::class, 'show'])->name('profile.show');
         Route::put('/profile', [StaffProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [StaffProfileController::class, 'updatePassword'])->name('profile.password');

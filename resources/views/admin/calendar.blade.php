@@ -149,7 +149,9 @@
     /* 1. Dot Events */
     .fc-custom-dot-event {
         background: transparent !important;
+        background-color: transparent !important;
         border: none !important;
+        box-shadow: none !important;
         color: #1e293b !important;
         font-size: 0.775rem !important;
         font-weight: 600 !important;
@@ -157,9 +159,15 @@
         cursor: pointer;
         display: flex !important;
         align-items: center;
-        gap: 3px;
+        gap: 4px;
         border-radius: 4px;
         transition: background-color 0.15s;
+    }
+
+    .fc-custom-dot-event .fc-event-time,
+    .fc-custom-dot-event .fc-event-title {
+        color: #1e293b !important;
+        font-weight: 600 !important;
     }
 
     /* Public Dot (Green/Emerald bullet) */
@@ -167,7 +175,9 @@
         background-color: rgba(16, 185, 129, 0.12) !important;
     }
     .fc-public-dot .fc-daygrid-event-dot {
+        border: 4px solid #10b981 !important;
         border-color: #10b981 !important;
+        background-color: #10b981 !important;
         margin-right: 4px !important;
     }
 
@@ -176,23 +186,41 @@
         background-color: rgba(99, 102, 241, 0.12) !important;
     }
     .fc-private-dot .fc-daygrid-event-dot {
+        border: 4px solid #6366f1 !important;
         border-color: #6366f1 !important;
+        background-color: #6366f1 !important;
         margin-right: 4px !important;
     }
 
     /* 2. Block Pill Events */
+    .fc-custom-block-event {
+        border-radius: 0.5rem !important;
+        padding: 3px 8px !important;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Hide the inner dot inside Block mode */
+    .fc-custom-block-event .fc-daygrid-event-dot {
+        display: none !important;
+    }
+
+    .fc-custom-block-event .fc-event-time,
+    .fc-custom-block-event .fc-event-title {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+
     /* Public Block (Emerald Gradient) */
     .fc-public-block {
         background: linear-gradient(135deg, #059669 0%, #0d9488 100%) !important;
-        border-color: #059669 !important;
+        border: 1px solid #059669 !important;
         color: #ffffff !important;
         font-size: 0.775rem !important;
         font-weight: 600 !important;
-        border-radius: 0.5rem !important;
-        padding: 3px 8px !important;
         box-shadow: 0 2px 4px rgba(5, 150, 105, 0.22);
-        cursor: pointer;
-        transition: transform 0.15s, box-shadow 0.15s;
     }
     .fc-public-block:hover {
         background: linear-gradient(135deg, #047857 0%, #0f766e 100%) !important;
@@ -203,15 +231,11 @@
     /* Private Block (Indigo to Purple Gradient) */
     .fc-private-block {
         background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-        border-color: #4f46e5 !important;
+        border: 1px solid #4f46e5 !important;
         color: #ffffff !important;
         font-size: 0.775rem !important;
         font-weight: 600 !important;
-        border-radius: 0.5rem !important;
-        padding: 3px 8px !important;
         box-shadow: 0 2px 4px rgba(79, 70, 229, 0.22);
-        cursor: pointer;
-        transition: transform 0.15s, box-shadow 0.15s;
     }
     .fc-private-block:hover {
         background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%) !important;
@@ -238,8 +262,8 @@
                 <span class="text-slate-400">Status:</span>
                 <select id="filter-status" class="bg-transparent border-none text-xs font-bold text-slate-800 focus:outline-none cursor-pointer">
                     <option value="all">Semua (Public & Private)</option>
-                    <option value="public">🌐 Public (1) Sahaja</option>
-                    <option value="private">🔒 Private (0) Sahaja</option>
+                    <option value="public">🌐 Public Sahaja</option>
+                    <option value="private">🔒 Private Sahaja</option>
                 </select>
             </div>
         </div>
@@ -254,11 +278,11 @@
             <div class="flex flex-wrap items-center gap-3 text-xs">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    Public (1) — Awam
+                    Public — Awam
                 </span>
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                    Private (0) — Peribadi
+                    Private — Peribadi
                 </span>
                 <span class="hidden md:inline text-slate-300">•</span>
                 <span class="hidden md:inline text-slate-400 text-[11px]">Klik pada mana-mana tarikh untuk menambah tugasan</span>
@@ -324,7 +348,19 @@
                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
             </div>
 
-            <!-- 2. Status Selection: Public (1) vs Private (0) -->
+            <!-- 2. Deskripsi / Butiran Acara (Description) -->
+            <div>
+                <label for="task-description" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                    Deskripsi / Butiran Acara <span class="text-slate-400 font-normal lowercase">(pilihan)</span>
+                </label>
+                <textarea id="task-description" 
+                          name="description" 
+                          rows="3" 
+                          placeholder="Masukkan butiran, lokasi, agenda, atau arahan berkaitan acara ini..."
+                          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
+            </div>
+
+            <!-- 3. Status Selection: Public (1) vs Private (0) -->
             <div>
                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Status Akses (Public vs Private) <span class="text-rose-500">*</span>
@@ -335,7 +371,7 @@
                         <div class="text-xs">
                             <div class="flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span class="font-bold text-slate-900">Public (1)</span>
+                                <span class="font-bold text-slate-900">Public</span>
                             </div>
                             <span class="text-slate-500 text-[11px] mt-0.5 block">Awam — Dilihat oleh semua</span>
                         </div>
@@ -346,7 +382,7 @@
                         <div class="text-xs">
                             <div class="flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-                                <span class="font-bold text-slate-900">Private (0)</span>
+                                <span class="font-bold text-slate-900">Private</span>
                             </div>
                             <span class="text-slate-500 text-[11px] mt-0.5 block">Peribadi — Admin sahaja</span>
                         </div>
@@ -384,14 +420,14 @@
                     Bentuk Paparan Kalendar
                 </label>
                 <div class="grid grid-cols-2 gap-3">
-                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 hover:border-indigo-200 transition-all">
+                    <label class="relative flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-indigo-50/40 hover:border-indigo-300 transition-all has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/50 has-[:checked]:ring-1 has-[:checked]:ring-indigo-500">
                         <input type="radio" name="display_style" value="dot" checked class="text-indigo-600 focus:ring-indigo-500">
                         <div class="text-xs">
                             <span class="font-bold text-slate-800 block">Titik Ringkas (Dot)</span>
                             <span class="text-slate-500 text-[11px]">Format: • Masa Tajuk</span>
                         </div>
                     </label>
-                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 hover:border-indigo-200 transition-all">
+                    <label class="relative flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-indigo-50/40 hover:border-indigo-300 transition-all has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/50 has-[:checked]:ring-1 has-[:checked]:ring-indigo-500">
                         <input type="radio" name="display_style" value="block" class="text-indigo-600 focus:ring-indigo-500">
                         <div class="text-xs">
                             <span class="font-bold text-slate-800 block">Sorotan Penuh (Block)</span>
@@ -536,6 +572,9 @@ function openNewTaskModal(dateStr = null) {
     const titleInput = document.getElementById('task-title');
     titleInput.value = '';
 
+    const descInput = document.getElementById('task-description');
+    if (descInput) descInput.value = '';
+
     modal.style.display = 'flex';
     setTimeout(() => titleInput.focus(), 50);
 }
@@ -628,19 +667,45 @@ document.addEventListener('DOMContentLoaded', function () {
             btnDeleteEvent.classList.remove('hidden');
             btnDeleteEvent.classList.add('inline-flex');
 
+            const isBlockStyle = props.display_style === 'block';
+            const styleBadge = isBlockStyle
+                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                     <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+                     Sorotan Penuh (Block)
+                   </span>`
+                : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                     <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+                     Titik Ringkas (Dot)
+                   </span>`;
+
             if (props.status === 1) {
                 statusBadgeContainer.innerHTML = `
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                        Public (1) — Boleh Dilihat Oleh Semua Staf
-                    </span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                            Public — Boleh Dilihat Oleh Semua Staf
+                        </span>
+                        ${styleBadge}
+                    </div>
                 `;
             } else {
                 statusBadgeContainer.innerHTML = `
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                        Private (0) — Kegunaan Peribadi Pentadbir
-                    </span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                            Private — Kegunaan Peribadi Pentadbir
+                        </span>
+                        ${styleBadge}
+                    </div>
+                `;
+            }
+
+            if (props.description && props.description.trim() !== '') {
+                extraContainer.innerHTML = `
+                    <div class="mt-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Deskripsi / Butiran Acara</span>
+                        <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed">${props.description}</p>
+                    </div>
                 `;
             }
 

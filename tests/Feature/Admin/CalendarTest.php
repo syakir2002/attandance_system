@@ -64,6 +64,7 @@ test('admin can fetch calendar events json with status filtering', function () {
 test('admin can store a new task with public or private status', function () {
     $payloadPublic = [
         'title' => 'Taklimat Awam Semua Staf',
+        'description' => 'Sila berkumpul di Dewan Utama pada jam 9 pagi.',
         'start_at' => now()->format('Y-m-d H:i:s'),
         'end_at' => now()->addHour()->format('Y-m-d H:i:s'),
         'status' => 1,
@@ -79,7 +80,9 @@ test('admin can store a new task with public or private status', function () {
 
     $this->assertDatabaseHas('callendar_info', [
         'title' => 'Taklimat Awam Semua Staf',
+        'description' => 'Sila berkumpul di Dewan Utama pada jam 9 pagi.',
         'status' => 1,
+        'display_style' => 'block',
     ]);
 
     $payloadPrivate = [
@@ -96,6 +99,7 @@ test('admin can store a new task with public or private status', function () {
     $this->assertDatabaseHas('callendar_info', [
         'title' => 'Catatan Peribadi Pentadbir',
         'status' => 0,
+        'display_style' => 'dot',
     ]);
 });
 

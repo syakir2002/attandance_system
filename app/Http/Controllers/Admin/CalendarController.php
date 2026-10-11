@@ -48,15 +48,12 @@ class CalendarController extends Controller
         $tasks = $tasksQuery->orderBy('start_at')->get();
 
         foreach ($tasks as $task) {
-            $diffMinutes = $task->start_at->diffInMinutes($task->end_at);
-            $isBlock = $diffMinutes >= 60;
+            $isBlock = ($task->display_style ?? 'dot') === 'block';
             $isPublic = (int) $task->status === 1;
-
-            $statusPrefix = $isPublic ? '[Public] ' : '[Private] ';
 
             $events[] = [
                 'id' => 'task_'.$task->id,
-                'title' => $statusPrefix.$task->title,
+                'title' => $task->title,
                 'start' => $task->start_at->toIso8601String(),
                 'end' => $task->end_at ? $task->end_at->toIso8601String() : null,
                 'allDay' => false,
@@ -67,9 +64,11 @@ class CalendarController extends Controller
                     'source' => 'task',
                     'db_id' => $task->id,
                     'raw_title' => $task->title,
+                    'description' => $task->description,
                     'status' => (int) $task->status,
                     'is_public' => $isPublic,
                     'status_label' => $isPublic ? 'Public (Awam / Semua Staf)' : 'Private (Peribadi / Admin Sahaja)',
+                    'display_style' => $task->display_style ?? 'dot',
                     'is_block' => $isBlock,
                     'start_formatted' => $task->start_at->translatedFormat('d M Y, h:i A'),
                     'end_formatted' => $task->end_at ? $task->end_at->translatedFormat('d M Y, h:i A') : '-',
@@ -87,6 +86,7 @@ class CalendarController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
             'start_at' => 'required|date',
             'end_at' => 'nullable',
             'status' => 'required|in:0,1',
@@ -94,10 +94,11 @@ class CalendarController extends Controller
         ]);
 
         $startAt = Carbon::parse($validated['start_at']);
+        $displayStyle = $validated['display_style'] ?? 'dot';
 
         // Safely determine end_at
         if (empty($validated['end_at'])) {
-            $endAt = ($validated['display_style'] ?? 'dot') === 'block'
+            $endAt = $displayStyle === 'block'
                 ? (clone $startAt)->addHours(2)
                 : (clone $startAt)->addMinutes(30);
         } else {
@@ -109,32 +110,39 @@ class CalendarController extends Controller
 
         $event = CalendarEvent::create([
             'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
             'start_at' => $startAt,
             'end_at' => $endAt,
             'status' => (int) $validated['status'],
+            'display_style' => $displayStyle,
             'timestamps' => now(),
         ]);
 
         $isPublic = (int) $event->status === 1;
-        $statusPrefix = $isPublic ? '[Public] ' : '[Private] ';
+        $isBlock = $displayStyle === 'block';
 
         return response()->json([
             'success' => true,
             'message' => 'Tugasan berjaya ditambah ke dalam pangkalan data!',
             'event' => [
                 'id' => 'task_'.$event->id,
-                'title' => $statusPrefix.$event->title,
+                'title' => $event->title,
                 'start' => $event->start_at->toIso8601String(),
                 'end' => $event->end_at->toIso8601String(),
                 'allDay' => false,
-                'className' => ($validated['display_style'] ?? 'dot') === 'block' ? 'fc-custom-block-event' : 'fc-custom-dot-event',
+                'className' => $isBlock
+                    ? ($isPublic ? 'fc-custom-block-event fc-public-block' : 'fc-custom-block-event fc-private-block')
+                    : ($isPublic ? 'fc-custom-dot-event fc-public-dot' : 'fc-custom-dot-event fc-private-dot'),
                 'extendedProps' => [
                     'source' => 'task',
                     'db_id' => $event->id,
                     'raw_title' => $event->title,
+                    'description' => $event->description,
                     'status' => (int) $event->status,
                     'is_public' => $isPublic,
                     'status_label' => $isPublic ? 'Public (Awam / Semua Staf)' : 'Private (Peribadi / Admin Sahaja)',
+                    'display_style' => $displayStyle,
+                    'is_block' => $isBlock,
                     'start_formatted' => $event->start_at->translatedFormat('d M Y, h:i A'),
                     'end_formatted' => $event->end_at->translatedFormat('d M Y, h:i A'),
                 ],
