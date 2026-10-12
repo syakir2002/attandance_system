@@ -63,6 +63,7 @@ class Attendance extends Model
         'keterangan_admin',
         'keterangan_system',
         'period',
+        'status',
     ];
 
     /**
@@ -129,11 +130,44 @@ class Attendance extends Model
     }
 
     /**
-     * Check if the attendance session is currently active (clocked in without clock out).
+     * Check if the attendance session is currently active for today.
      */
     public function isActive(): bool
     {
-        return is_null($this->check_out);
+        return is_null($this->check_out) && Carbon::parse($this->date)->isToday();
+    }
+
+    /**
+     * Check if the attendance session is incomplete (past date with no check_out).
+     */
+    public function isIncomplete(): bool
+    {
+        if ($this->status === 'incomplete') {
+            return true;
+        }
+
+        return is_null($this->check_out) && Carbon::parse($this->date)->isBefore(now()->startOfDay());
+    }
+
+    /**
+     * Synchronize open sessions from previous days to incomplete status without auto-cutting check_out.
+     */
+    public static function syncIncompleteSessions(?string $staffId = null): int
+    {
+        $query = static::where('date', '<', now()->toDateString())
+            ->whereNull('check_out')
+            ->where(function ($q) {
+                $q->whereNull('status')->orWhere('status', '!=', 'incomplete');
+            });
+
+        if ($staffId !== null) {
+            $query->where('staff_id', $staffId);
+        }
+
+        return $query->update([
+            'status' => 'incomplete',
+            'period' => null,
+        ]);
     }
 
     /**

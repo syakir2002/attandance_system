@@ -4,6 +4,31 @@
 
 @section('content')
 <div class="space-y-6">
+    @if(isset($incompleteCount) && $incompleteCount > 0)
+        <!-- Alert Banner: Incomplete Attendance Sessions -->
+        <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200/90 rounded-3xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-200/70 text-amber-900 text-[11px] font-bold tracking-wide uppercase mb-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+                        Perhatian: Rekod Belum Lengkap
+                    </div>
+                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
+                        Anda mempunyai {{ $incompleteCount }} sesi 'Incomplete' (terlupa Clock Out).
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-600 mt-0.5 leading-relaxed">
+                        Sila klik butang <strong class="text-amber-800 font-bold">"Kemaskini Clock Out"</strong> pada rekod berkaitan sebelum akhir bulan. Sesi yang tidak dikemaskini sebelum akhir bulan tidak akan diambil kira dalam jumlah masa bekerja anda.
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Header & Filter Form -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
         <div>
@@ -135,7 +160,7 @@
                         <th class="py-3 px-6">Tempoh (Period)</th>
                         <th class="py-3 px-6">Keterangan</th>
                         <th class="py-3 px-6">Catatan Admin</th>
-                        <th class="py-3 px-6 text-right">Status</th>
+                        <th class="py-3 px-6 text-right">Status & Tindakan</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-medium">
@@ -189,13 +214,43 @@
                             <td class="py-4 px-6 text-xs text-slate-600 max-w-xs">
                                 {{ $record->keterangan_admin ?: '-' }}
                             </td>
-                            <td class="py-4 px-6 text-right">
-                                @if($record->isActive())
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                            <td class="py-4 px-6 text-right whitespace-nowrap">
+                                @if($record->isIncomplete())
+                                    @php
+                                        $isPastCutoff = \Carbon\Carbon::parse($record->date)->format('Y-m') < now()->format('Y-m');
+                                    @endphp
+                                    <div class="inline-flex items-center gap-2 justify-end">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                            Incomplete
+                                        </span>
+
+                                        @if(!$isPastCutoff)
+                                            <button type="button" 
+                                                    onclick="openClockOutModal('{{ $record->id }}', '{{ \Carbon\Carbon::parse($record->date)->isoFormat('dddd, D MMM Y') }}', '{{ $record->check_in ? date('h:i A', strtotime($record->check_in)) : '-' }}')" 
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                                                    style="background-color: #d97706; color: #ffffff; border: 1px solid #b45309;"
+                                                    onmouseover="this.style.backgroundColor='#b45309'"
+                                                    onmouseout="this.style.backgroundColor='#d97706'"
+                                                    title="Kemaskini Clock Out bagi sesi yang belum lengkap">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #ffffff;">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span>Kemaskini Clock Out</span>
+                                            </button>
+                                        @else
+                                            <span class="text-[11px] font-semibold text-rose-600 italic" title="Tamat tempoh akhir bulan. Sesi ini tidak dikira jam bekerja.">
+                                                Tamat Tempoh
+                                            </span>
+                                        @endif
+                                    </div>
+                                @elseif($record->isActive())
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
                                         Aktif
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                         Selesai
                                     </span>
                                 @endif
@@ -224,8 +279,166 @@
     </div>
 </div>
 
+<!-- Modal Kemaskini Clock Out (Centered, Pure Solid White Modal on Clean Backdrop) -->
+<div id="clockOutModal" 
+     style="display: none; background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
+     class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+     onclick="if(event.target === this) closeClockOutModal()">
+    <div class="relative w-full max-w-lg rounded-3xl overflow-hidden border border-slate-200 transform transition-all shadow-2xl my-8"
+         style="background-color: #ffffff; color: #0f172a; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);">
+        <form id="clockOutForm" method="POST" action="">
+            @csrf
+            @method('PUT')
+
+            <!-- Modal Header -->
+            <div class="px-6 py-5 relative"
+                 style="background: linear-gradient(135deg, #3730a3 0%, #1e1b4b 100%); color: #ffffff;">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                             style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25);">
+                            <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-extrabold text-white tracking-tight" id="modal-title">
+                                Kemaskini Clock Out
+                            </h3>
+                            <p class="text-xs text-indigo-200">
+                                Lengkapkan masa tamat bagi sesi yang tertinggal.
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" 
+                            onclick="closeClockOutModal()" 
+                            class="p-1.5 rounded-lg transition-colors cursor-pointer text-white/80 hover:text-white"
+                            style="background: transparent;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5" style="background-color: #ffffff;">
+                <!-- Session Details Info Card -->
+                <div class="rounded-2xl p-4 grid grid-cols-2 gap-3 text-xs" 
+                     style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                    <div>
+                        <span class="font-semibold uppercase tracking-wider block text-[10px]" style="color: #64748b;">ID Sesi</span>
+                        <span class="font-mono-num font-bold text-xs sm:text-sm block mt-0.5" id="modalSessionId" style="color: #4338ca;">-</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold uppercase tracking-wider block text-[10px]" style="color: #64748b;">Tarikh</span>
+                        <span class="font-bold text-xs sm:text-sm block mt-0.5" id="modalDate" style="color: #1e293b;">-</span>
+                    </div>
+                    <div class="col-span-2 pt-2.5 flex items-center justify-between" style="border-top: 1px solid #e2e8f0;">
+                        <span class="font-semibold uppercase tracking-wider text-[10px]" style="color: #64748b;">Masa Clock In Asal:</span>
+                        <span class="font-mono-num font-extrabold px-2.5 py-0.5 rounded-lg text-xs" id="modalClockIn" style="background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;">-</span>
+                    </div>
+                </div>
+
+                <!-- Input Clock Out Time -->
+                <div>
+                    <label for="modal_check_out" class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: #334155;">
+                        Masa Clock Out Sebenar <span style="color: #e11d48;">*</span>
+                    </label>
+                    <input type="time" 
+                           name="check_out" 
+                           id="modal_check_out" 
+                           required 
+                           class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer focus:outline-none"
+                           style="background-color: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a;">
+                    <p class="text-[11px] mt-1" style="color: #64748b;">
+                        Sila masukkan masa sebenar anda tamat bertugas pada tarikh tersebut (mesti selepas waktu Clock In).
+                    </p>
+                </div>
+
+                <!-- Input Keterangan / Sebab -->
+                <div>
+                    <label for="modal_keterangan_out" class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: #334155;">
+                        Alasan / Catatan (Pilihan)
+                    </label>
+                    <textarea name="keterangan_out" 
+                              id="modal_keterangan_out" 
+                              rows="2" 
+                              placeholder="Cth: Terlupa tekan butang clock out sebelum pulang..." 
+                              class="w-full px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all resize-none focus:outline-none"
+                              style="background-color: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a;"></textarea>
+                </div>
+
+                <!-- Warning Notice -->
+                <div class="p-3 rounded-xl flex items-start gap-2.5 text-xs" 
+                     style="background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e;">
+                    <svg class="w-4 h-4 shrink-0 mt-0.5" style="color: #d97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="leading-relaxed">
+                        Masa Clock Out yang dimasukkan akan direkodkan dan tempoh jam bekerja sesi ini akan dikira semula secara automatik.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 flex items-center justify-end gap-3" 
+                 style="background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
+                <button type="button" 
+                        onclick="closeClockOutModal()" 
+                        class="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+                        style="color: #475569; background-color: #e2e8f0;"
+                        onmouseover="this.style.backgroundColor='#cbd5e1'"
+                        onmouseout="this.style.backgroundColor='#e2e8f0'">
+                    Batal
+                </button>
+                <button type="submit" 
+                        class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer inline-flex items-center gap-1.5"
+                        style="background-color: #4f46e5; color: #ffffff;"
+                        onmouseover="this.style.backgroundColor='#4338ca'"
+                        onmouseout="this.style.backgroundColor='#4f46e5'">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Simpan & Kemaskini
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <script>
+    function openClockOutModal(sessionId, formattedDate, checkInTime) {
+        const modal = document.getElementById('clockOutModal');
+        const form = document.getElementById('clockOutForm');
+        const url = '{{ route("staff.attendance.update_clock_out", ":id") }}'.replace(':id', sessionId);
+        
+        form.action = url;
+        document.getElementById('modalSessionId').textContent = sessionId;
+        document.getElementById('modalDate').textContent = formattedDate;
+        document.getElementById('modalClockIn').textContent = checkInTime;
+        document.getElementById('modal_check_out').value = '';
+        document.getElementById('modal_keterangan_out').value = '';
+        
+        modal.style.display = 'flex';
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeClockOutModal() {
+        const modal = document.getElementById('clockOutModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeClockOutModal();
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         const dateInput = document.getElementById('filter_date');
         const monthSelect = document.getElementById('filter_month');

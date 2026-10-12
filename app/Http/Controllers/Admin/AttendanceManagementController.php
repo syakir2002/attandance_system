@@ -23,6 +23,7 @@ class AttendanceManagementController extends Controller
      */
     public function index(Request $request): View
     {
+        Attendance::syncIncompleteSessions();
 
         $staffId = $request->input('staff_id', '');
         $date = $request->input('date', '');
@@ -72,8 +73,8 @@ class AttendanceManagementController extends Controller
         $validated = $request->validate([
             'staff_id' => ['required', 'exists:user,staff_id'],
             'date' => ['required', 'date_format:Y-m-d'],
-            'check_in' => ['required', 'date_format:H:i:s'],
-            'check_out' => ['nullable', 'date_format:H:i:s'],
+            'check_in' => ['required'],
+            'check_out' => ['nullable'],
             'keterangan_in' => ['nullable', 'string', 'max:255'],
             'keterangan_out' => ['nullable', 'string', 'max:255'],
             'keterangan_staff' => ['nullable', 'string', 'max:255'],
@@ -86,8 +87,11 @@ class AttendanceManagementController extends Controller
 
         $staffId = $validated['staff_id'];
         $date = $validated['date'];
-        $checkIn = $validated['check_in'];
-        $checkOut = ! empty($validated['check_out']) ? $validated['check_out'] : null;
+        $checkIn = strlen($validated['check_in']) === 5 ? $validated['check_in'].':00' : $validated['check_in'];
+        $checkOut = null;
+        if (! empty($validated['check_out'])) {
+            $checkOut = strlen($validated['check_out']) === 5 ? $validated['check_out'].':00' : $validated['check_out'];
+        }
 
         // Generate Custom ID: {staff_id}-{YYYYMMDD}-{session_number}
         $customId = Attendance::generateCustomId($staffId, $date);
@@ -169,6 +173,7 @@ class AttendanceManagementController extends Controller
             'date' => $validated['date'],
             'check_in' => $checkIn,
             'check_out' => $checkOut,
+            'status' => ! empty($checkOut) ? 'completed' : 'incomplete',
             'keterangan_admin' => $validated['keterangan_admin'] ?? null,
             'period' => $period,
         ];
@@ -376,7 +381,7 @@ class AttendanceManagementController extends Controller
                 }
             }
 
-            return response(TCPDF::Output($filename, 'I'), Response::HTTP_OK, [
+            return response(TCPDF::Output($filename, 'S'), Response::HTTP_OK, [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ]);

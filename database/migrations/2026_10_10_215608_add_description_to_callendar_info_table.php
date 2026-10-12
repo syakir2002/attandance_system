@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('callendar_info', function (Blueprint $table) {
-            $table->text('description')->nullable()->after('title');
-        });
+        if (! Schema::hasColumn('callendar_info', 'description')) {
+            Schema::table('callendar_info', function (Blueprint $table) {
+                $table->text('description')->nullable()->after('title');
+            });
+        }
     }
 
     /**

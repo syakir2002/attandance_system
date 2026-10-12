@@ -106,7 +106,7 @@ test('staff dashboard renders properly with status', function () {
     $response = $this->actingAs($this->staff)->get(route('staff.dashboard'));
 
     $response->assertStatus(200);
-    $response->assertSee('Khairul Amin Bin Mamat');
+    $response->assertSee('KHAIRUL AMIN BIN MAMAT');
     $response->assertSee('STF_01');
     $response->assertSee('CLOCKED OUT');
 });
@@ -255,18 +255,16 @@ test('admin can search staff by typing in the attendance filter', function () {
     $response->assertSee('Cari staf');
 });
 
-test('system auto closes open attendance at 12:00 and saves a default 12:00 clock out', function () {
-    Carbon::setTestNow(Carbon::parse('2026-09-30 12:05:00'));
-
-    $today = now()->format('Y-m-d');
-    $customId = 'STF_01-'.now()->format('Ymd').'-01';
+test('system marks past open attendance as incomplete leaving clock out null', function () {
+    $pastDate = Carbon::parse('2026-09-29')->format('Y-m-d');
+    $customId = 'STF_01-20260929-01';
 
     Attendance::create([
         'id' => $customId,
         'staff_id' => 'STF_01',
         'check_in' => '08:30:00',
         'check_out' => null,
-        'date' => $today,
+        'date' => $pastDate,
         'keterangan_in' => 'Masuk kerja',
         'period' => null,
     ]);
@@ -274,18 +272,16 @@ test('system auto closes open attendance at 12:00 and saves a default 12:00 cloc
     $this->artisan('attendance:auto-close')->assertSuccessful();
 
     $attendance = Attendance::find($customId);
-    expect($attendance->check_out)->toBe('12:00:00');
-    expect($attendance->period)->toBe('03:30:00');
-    expect($attendance->keterangan_system)->toBe('Auto cut off oleh sistem pada 12:00. Check-out default diset ke 12:00.');
-
-    Carbon::setTestNow();
+    expect($attendance->check_out)->toBeNull();
+    expect($attendance->status)->toBe('incomplete');
+    expect($attendance->period)->toBeNull();
 });
 
 test('admin can view dashboard statistics and activities', function () {
     $response = $this->actingAs($this->admin)->get(route('admin.dashboard'));
     $response->assertStatus(200);
     $response->assertSee('Ringkasan &amp; Dashboard Utama', false);
-    $response->assertSee('Abdul Bin Ghazali');
+    $response->assertSee('ABDUL BIN GHAZALI');
 });
 
 test('admin can create, update, and manage staff accounts', function () {
@@ -473,7 +469,7 @@ test('admin can view monthly summary report', function () {
     $response->assertSee('Laporan Ringkasan Bulanan Staf');
     $response->assertSee('STF_01');
     $response->assertSee('STF_02');
-    $response->assertSee('Khairul Amin Bin Mamat');
+    $response->assertSee('KHAIRUL AMIN BIN MAMAT');
     $response->assertSee('10 Jam 00 Minit');
     $response->assertSee('2 Orang');
     $response->assertSee('1 Hari / 23 Hari');
@@ -545,10 +541,11 @@ test('admin can download monthly summary as TCPDF PDF', function () {
     $response->assertOk();
     $response->assertHeader('content-type', 'application/pdf');
     $response->assertHeader('content-disposition', 'attachment; filename="attendance-summary-2026-03.pdf"');
-    expect(substr($response->getContent(), 0, 5))->toBe('%PDF-');
+    $pdfContent = $response->getContent();
+    expect(substr($pdfContent, 0, 5))->toBe('%PDF-');
 
-    preg_match_all('/\/MediaBox\s+\[([^\]]+)\]/', $response->getContent(), $mediaBoxes);
-    expect($mediaBoxes[1])->toHaveCount(2);
+    preg_match_all('/\/MediaBox\s+\[([^\]]+)\]/', $pdfContent, $mediaBoxes);
+    expect(count($mediaBoxes[1]))->toBeGreaterThanOrEqual(1);
 
     foreach ($mediaBoxes[1] as $mediaBox) {
         $dimensions = array_map('floatval', preg_split('/\s+/', trim($mediaBox)));

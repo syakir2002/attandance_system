@@ -162,7 +162,17 @@
                                     {{ date('h:i A', strtotime($rec->check_in ))}}
                                 </td>
                                 <td class="py-3.5 px-5 font-mono-num text-xs text-slate-700">
-                                    {{ $rec->check_out ? date('h:i A', strtotime($rec->check_out)) :  '-'}}
+                                    @if($rec->check_out)
+                                        {{ date('h:i A', strtotime($rec->check_out)) }}
+                                    @elseif($rec->isIncomplete())
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                            Incomplete
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800">
+                                            Aktif
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="py-3.5 px-5 font-mono-num text-xs font-bold text-slate-900">
                                     {{ $rec->period ?? '-' }}

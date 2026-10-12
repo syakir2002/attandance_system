@@ -5,6 +5,9 @@
 @section('content')
 @php
 $time = now()->isAfter('9:30');
+@endphp
+<!-- 
+
 $time_now1 = now()->isAfter('24:00');
 $time_now2 = now()->isBefore('7:00');
 $button_disable= false;
@@ -12,7 +15,8 @@ $button_disable= false;
 if($time_now1 === true && $time_now2===true){
     $button_disable=true;
 }
-@endphp
+ -->
+
 <div class="space-y-6">
     <!-- Top Welcome & Real-Time Clock Banner (Compact) -->
     <div class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-md relative overflow-hidden">
@@ -89,7 +93,7 @@ if($time_now1 === true && $time_now2===true){
                                 <div class="absolute -inset-3 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full blur-lg opacity-40 group-hover:opacity-70 transition duration-500 group-hover:scale-105 animate-pulse"></div>
 
                                 <button type="submit" 
-                                        class="relative w-44 h-44 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold shadow-2xl shadow-emerald-600/40 flex flex-col items-center justify-center gap-2 transition-all duration-300 transform group-hover:scale-105 active:scale-95 cursor-pointer border-4 border-white/40 ring-4 ring-emerald-500/20" {{$button_disable ? 'disabled' : ''}}>
+                                        class="relative w-44 h-44 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold shadow-2xl shadow-emerald-600/40 flex flex-col items-center justify-center gap-2 transition-all duration-300 transform group-hover:scale-105 active:scale-95 cursor-pointer border-4 border-white/40 ring-4 ring-emerald-500/20">
                                     <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-xs">
                                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -272,11 +276,11 @@ if($time_now1 === true && $time_now2===true){
                                         </span>
                                     </td>
                                     <td class="py-3 px-2 text-slate-700 text-xs">
-                                        {{ $session->check_in }}
+                                        {{ date('h:i:A',strtotime($session->check_in)) }}
                                     </td>
                                     <td class="py-3 px-2 text-xs">
                                         @if($session->check_out)
-                                            <span class="text-slate-700">{{ $session->check_out }}</span>
+                                            <span class="text-slate-700">{{ date('h:i:A',strtotime($session->check_out)) }}</span>
                                         @else
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                                                 <span class="w-1 h-1 rounded-full bg-emerald-600 animate-pulse"></span>
@@ -366,5 +370,6 @@ if($time_now1 === true && $time_now2===true){
 @endpush
 
 @include('layouts.clock_out_confirmation')
+@include('layouts.incomplete_attendance_modal')
 
 @endsection

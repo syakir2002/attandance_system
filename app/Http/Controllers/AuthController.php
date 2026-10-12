@@ -42,7 +42,7 @@ class AuthController extends Controller
 
         $loginInput = trim($credentials['login']);
         $password = $credentials['password'];
-        
+
         // Email comparison follows the database collation; Staff ID must match exactly.
         $user = User::where('email', $loginInput)->first();
 
@@ -71,6 +71,8 @@ class AuthController extends Controller
                     return redirect()->intended(route('admin.dashboard'))
                         ->with('success', "Selamat Datang, {$user->name}!");
                 }
+
+                $request->session()->put('just_logged_in', true);
 
                 return redirect()->intended(route('staff.dashboard'))
                     ->with('success', "Selamat Datang, {$user->name}!");

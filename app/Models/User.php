@@ -99,4 +99,16 @@ class User extends Authenticatable
     {
         return $this->role === 'staff';
     }
+
+    /**
+     * Get count of incomplete attendance sessions for this user.
+     */
+    public function incompleteAttendancesCount(): int
+    {
+        Attendance::syncIncompleteSessions($this->staff_id);
+
+        return $this->attendances()
+            ->where('status', 'incomplete')
+            ->count();
+    }
 }

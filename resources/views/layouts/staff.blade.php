@@ -32,13 +32,22 @@
                             Dashboard & Clock In
                         </span>
                     </a>
+                    @php
+                        $incompleteAlertCount = auth()->check() ? auth()->user()->incompleteAttendancesCount() : 0;
+                    @endphp
                     <a href="{{ route('staff.attendance.history') }}" 
                        class="px-3.5 py-2 rounded-lg text-sm font-medium transition-all {{ request()->routeIs('staff.attendance.history') ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
                         <span class="flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Sejarah Kehadiran
+                            <span>Sejarah Kehadiran</span>
+                            @if($incompleteAlertCount > 0)
+                                <span class="relative flex h-2.5 w-2.5" title="{{ $incompleteAlertCount }} sesi incomplete perlu dikemaskini">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                                </span>
+                            @endif
                         </span>
                     </a>
                     <a href="{{ route('staff.calendar.index') }}" 
@@ -91,7 +100,12 @@
             <!-- Mobile Submenu -->
             <div class="flex md:hidden items-center justify-around py-2 border-t border-slate-100 text-xs font-medium">
                 <a href="{{ route('staff.dashboard') }}" class="{{ request()->routeIs('staff.dashboard') ? 'text-indigo-600 font-bold' : 'text-slate-600' }} py-1">Dashboard</a>
-                <a href="{{ route('staff.attendance.history') }}" class="{{ request()->routeIs('staff.attendance.history') ? 'text-indigo-600 font-bold' : 'text-slate-600' }} py-1">Kehadiran</a>
+                <a href="{{ route('staff.attendance.history') }}" class="{{ request()->routeIs('staff.attendance.history') ? 'text-indigo-600 font-bold' : 'text-slate-600' }} py-1 inline-flex items-center gap-1">
+                    <span>Kehadiran</span>
+                    @if($incompleteAlertCount > 0)
+                        <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
+                    @endif
+                </a>
                 <a href="{{ route('staff.calendar.index') }}" class="{{ request()->routeIs('staff.calendar.*') ? 'text-indigo-600 font-bold' : 'text-slate-600' }} py-1">Kalendar</a>
                 <a href="{{ route('staff.profile.show') }}" class="{{ request()->routeIs('staff.profile.show') ? 'text-indigo-600 font-bold' : 'text-slate-600' }} py-1">Profil</a>
             </div>

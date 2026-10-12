@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('callendar_info', function (Blueprint $table) {
-            $table->string('display_style', 20)->default('dot')->after('status');
-        });
+        if (! Schema::hasColumn('callendar_info', 'display_style')) {
+            Schema::table('callendar_info', function (Blueprint $table) {
+                $table->string('display_style', 20)->default('dot')->after('status');
+            });
+        }
     }
 
     /**
