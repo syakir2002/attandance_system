@@ -350,13 +350,13 @@
             <!-- 2. Deskripsi / Butiran Acara (Description) -->
             <div>
                 <label for="task-description" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                    Deskripsi / Butiran Acara <span class="text-slate-400 font-normal lowercase">(pilihan)</span>
+                    Deskripsi / Butiran Acara <span class="text-rose-500">*</span>
                 </label>
                 <textarea id="task-description" 
                           name="description" 
                           rows="3" 
                           placeholder="Masukkan butiran, lokasi, agenda, atau arahan berkaitan acara ini..."
-                          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none"></textarea>
+                          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none" required></textarea>
             </div>
 
             <!-- 3. Status Selection: Public (1) vs Private (0) -->
