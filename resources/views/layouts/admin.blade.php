@@ -78,11 +78,18 @@
             <div class="pt-4 px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Kehadiran</div>
 
             <a href="{{ route('admin.attendance.index') }}" 
-               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.attendance.index') ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-900/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <span>Rekod & Pembetulan</span>
+               class="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all {{ request()->routeIs('admin.attendance.index') ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-900/30' : 'text-slate-400 hover:text-white hover:bg-slate-800/60' }}">
+                <div class="flex items-center gap-3 min-w-0">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="truncate">Rekod & Pembetulan</span>
+                </div>
+                @if(($incompleteAttendanceCount ?? 0) > 0)
+                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold {{ request()->routeIs('admin.attendance.index') ? 'bg-amber-400 text-indigo-950' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }} shrink-0" title="{{ $incompleteAttendanceCount }} sesi tidak clock out">
+                        {{ $incompleteAttendanceCount }}
+                    </span>
+                @endif
             </a>
 
             <a href="{{ route('admin.attendance.summary') }}" 

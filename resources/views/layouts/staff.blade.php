@@ -43,7 +43,7 @@
                             </svg>
                             <span>Sejarah Kehadiran</span>
                             @if($incompleteAlertCount > 0)
-                                <span class="relative flex h-2.5 w-2.5" title="{{ $incompleteAlertCount }} sesi incomplete perlu dikemaskini">
+                                <span class="relative flex h-2.5 w-2.5" title="{{ $incompleteAlertCount }} sesi tidak lengkap perlu dikemaskini">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
                                 </span>

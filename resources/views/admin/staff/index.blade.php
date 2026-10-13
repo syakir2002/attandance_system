@@ -15,6 +15,7 @@
         <div class="flex flex-wrap items-center gap-3">
             <!-- Search Form -->
             <form action="{{ route('admin.staff.index') }}" method="GET" class="flex items-center gap-2">
+                <input type="hidden" name="status" value="{{ $statusFilter }}">
                 <div class="relative w-48 sm:w-64">
                     <input type="text" name="search" value="{{ $search }}"
                            placeholder="Cari nama / ID / emel..."
@@ -27,7 +28,7 @@
                 </div>
 
                 @if($search !== '')
-                    <a href="{{ route('admin.staff.index') }}"
+                    <a href="{{ route('admin.staff.index', ['status' => $statusFilter]) }}"
                        class="inline-flex items-center px-3 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-colors">
                         Reset
                     </a>
@@ -46,6 +47,24 @@
         </div>
     </div>
 
+    <!-- Status Tabs (Aktif vs Dipadam) -->
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-1">
+        <a href="{{ route('admin.staff.index', ['status' => 'active', 'search' => $search]) }}"
+           class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all {{ $statusFilter !== 'trashed' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+            <span>Staf Aktif</span>
+        </a>
+
+        <a href="{{ route('admin.staff.index', ['status' => 'trashed', 'search' => $search]) }}"
+           class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all {{ $statusFilter === 'trashed' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+            <span>Staf Dipadam</span>
+            @if($trashedCount > 0)
+                <span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-black rounded-full {{ $statusFilter === 'trashed' ? 'bg-white text-rose-700' : 'bg-rose-100 text-rose-700' }}">
+                    {{ $trashedCount }}
+                </span>
+            @endif
+        </a>
+    </div>
+
     <!-- Staff List Table -->
     <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
@@ -56,7 +75,7 @@
                         <th class="py-3.5 px-6">Nama Penuh</th>
                         <th class="py-3.5 px-6">Emel</th>
                         <th class="py-3.5 px-6">Telefon</th>
-                        <th class="py-3.5 px-6">Role</th>
+                        <th class="py-3.5 px-6">{{ $statusFilter === 'trashed' ? 'Tarikh Dipadam' : 'Role' }}</th>
                         <th class="py-3.5 px-6 text-right">Tindakan</th>
                     </tr>
                 </thead>
@@ -76,7 +95,12 @@
                                 {{ $user->phone_number ?: '-' }}
                             </td>
                             <td class="py-4 px-6">
-                                @if($user->isAdmin())
+                                @if($statusFilter === 'trashed')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-mono-num font-semibold border border-rose-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                        {{ $user->deleted_at?->format('d/m/Y H:i') }}
+                                    </span>
+                                @elseif($user->isAdmin())
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-50 text-violet-700 border border-violet-200">
                                         Admin
                                     </span>
@@ -87,52 +111,71 @@
                                 @endif
                             </td>
                             <td class="py-4 px-6 text-right">
-                                <div class="inline-flex items-center gap-1.5">
-                                    <!-- Edit Button -->
-                                    <button type="button" 
-                                            onclick="openEditModal({{ json_encode($user) }})"
-                                            title="Kemas Kini Staf"
-                                            class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
+                                @if($statusFilter === 'trashed')
+                                    <!-- Restore Button -->
+                                    <form action="{{ route('admin.staff.restore', $user->staff_id) }}" 
+                                          method="POST"
+                                          data-confirm="Adakah anda pasti untuk memulihkan akaun staf {{ $user->staff_id }} ({{ mb_strtoupper($user->name, 'UTF-8') }})?"
+                                          data-confirm-title="Pulihkan Staf?"
+                                          data-confirm-btn="Pulihkan Staf">
+                                        @csrf
+                                        <button type="submit" 
+                                                title="Pulihkan Staf"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                            Pulihkan
+                                        </button>
+                                    </form>
+                                @else
+                                    <div class="inline-flex items-center gap-1.5">
+                                        <!-- Edit Button -->
+                                        <button type="button" 
+                                                onclick="openEditModal({{ json_encode($user) }})"
+                                                title="Kemas Kini Staf"
+                                                class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </button>
 
-                                    <!-- Reset Password Button -->
-                                    <button type="button" 
-                                            onclick="openResetPasswordModal('{{ $user->staff_id }}', '{{ $user->name }}')"
-                                            title="Reset Kata Laluan"
-                                            class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                                        </svg>
-                                    </button>
+                                        <!-- Reset Password Button -->
+                                        <button type="button" 
+                                                onclick="openResetPasswordModal('{{ $user->staff_id }}', '{{ $user->name }}')"
+                                                title="Reset Kata Laluan"
+                                                class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                            </svg>
+                                        </button>
 
-                                    <!-- Delete Button -->
-                                    @if(auth()->id() !== $user->staff_id)
-                                        <form action="{{ route('admin.staff.destroy', $user->staff_id) }}" 
-                                              method="POST"
-                                              data-confirm="Adakah anda pasti untuk memadam staf {{ $user->staff_id }} ({{ mb_strtoupper($user->name, 'UTF-8') }})? Tindakan ini tidak boleh diundur."
-                                              data-confirm-title="Padam Staf?"
-                                              data-confirm-btn="Padam Staf">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    title="Padam Staf"
-                                                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
+                                        <!-- Delete Button (Soft Delete) -->
+                                        @if(auth()->id() !== $user->staff_id)
+                                            <form action="{{ route('admin.staff.destroy', $user->staff_id) }}" 
+                                                  method="POST"
+                                                  data-confirm="Adakah anda pasti untuk memadam staf {{ $user->staff_id }} ({{ mb_strtoupper($user->name, 'UTF-8') }})?."
+                                                  data-confirm-title="Padam Staf?"
+                                                  data-confirm-btn="Padam Staf">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" 
+                                                        title="Padam Staf"
+                                                        class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="py-12 text-center text-slate-400">
-                                Tiada rekod staf ditemui.
+                                {{ $statusFilter === 'trashed' ? 'Tiada rekod staf dipadam dijumpai.' : 'Tiada rekod staf ditemui.' }}
                             </td>
                         </tr>
                     @endforelse

@@ -24,7 +24,7 @@
 
     <!-- Filter Form -->
     <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs">
-        <form action="{{ route('admin.attendance.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+        <form action="{{ route('admin.attendance.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
             <!-- Filter 1: Staf -->
             <div>
                 @php
@@ -36,7 +36,7 @@
                     id="staffSearchInput"
                     name="staff_search"
                     list="staffSearchOptions"
-                    value="{{ $selectedStaff ? $selectedStaff->staff_id . ' - ' . mb_strtoupper($selectedStaff->name, 'UTF-8') : '' }}"
+                    value="{{ $selectedStaff ? $selectedStaff->staff_id . ' - ' . mb_strtoupper($selectedStaff->name, 'UTF-8') : ($staffSearch ?? '') }}"
                     placeholder="Cari staf..."
                     class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
@@ -79,6 +79,16 @@
                 </select>
             </div>
 
+            <!-- Filter 5: Status -->
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Status Kehadiran</label>
+                <select name="status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Semua Status</option>
+                    <option value="completed" {{ ($status ?? '') === 'completed' ? 'selected' : '' }}>Selesai</option>
+                    <option value="incomplete" {{ ($status ?? '') === 'incomplete' ? 'selected' : '' }}>Tidak Lengkap</option>
+                </select>
+            </div>
+
             <!-- Buttons -->
             <div class="flex items-center gap-2">
                 <button type="submit" class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors cursor-pointer">
@@ -93,6 +103,18 @@
 
     <!-- Attendance Table -->
     <div class="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        @if(($status ?? '') === 'incomplete')
+            <div class="px-5 sm:px-6 py-3 bg-amber-50/80 border-b border-amber-200/70 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-900">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span>Menapis sesi: <strong>Tidak Lengkap (Tiada Rekod Clock Out)</strong> &bull; {{ $records->total() }} rekod dijumpai</span>
+                </div>
+                <a href="{{ route('admin.attendance.index') }}" class="font-bold text-amber-800 hover:text-amber-950 underline">
+                    Papar Semua Rekod &times;
+                </a>
+            </div>
+        @endif
+
         <div class="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
                 Senarai Rekod Kehadiran ({{ $records->total() }} Jumlah Rekod)
@@ -166,10 +188,10 @@
                                         {{ date('h:i A', strtotime($rec->check_out)) }}
                                     @elseif($rec->isIncomplete())
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                                            Incomplete
+                                            Tidak Lengkap
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                             Aktif
                                         </span>
                                     @endif
@@ -455,45 +477,50 @@
     document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById('staffSearchInput');
 
-        const timeMula = document.getElementById('task_start_time');
-        const timeTamat = document.getElementById('task_end_time');
-        if(timeMula && timeTamat){
-            timeMula.addEventListener('change',function(){
-                let valMula = this.value;
-                if(!valMula) return;
+        function pasangSemakMasa(idMula, idTamat) {
+            const timeMula = document.getElementById(idMula);
+            const timeTamat = document.getElementById(idTamat);
 
-                const to24 = (timeStr) => {
+            if (!timeMula || !timeTamat) return;
 
-                        if(!timeStr) return '';
-                    
-                        let [time,modifier] = timeStr.split(' ');
-                        let [hours, minutes] = time.split(':');
-                        if(hours === '12'){
-                            hours = '00';
-                        }
-                        if(modifier === 'PM'){
-                            hours = parseInt(hours, 10) +12;
-                        }
-
-                        return `${String(hours).padStart(2, '0')}:${minutes}`;if(!timeStr.includes('AM') && !timeStr.includes('PM')){
+            const to24 = (timeStr) => {
+                if (!timeStr) return '';
+                timeStr = timeStr.trim();
+                if (timeStr.includes('AM') || timeStr.includes('PM')) {
+                    let [time, modifier] = timeStr.split(' ');
+                    let [hours, minutes] = time.split(':');
+                    if (hours === '12') {
+                        hours = '00';
                     }
-                    return timeStr.substring(0,5);
+                    if (modifier === 'PM') {
+                        hours = parseInt(hours, 10) + 12;
+                    }
+                    return `${String(hours).padStart(2, '0')}:${minutes}`;
                 }
+                return timeStr.substring(0, 5);
+            };
 
-                const semakMasa = () =>{
-                     let formatMula = to24(valMula);
-                    let formatTamat = to24(timeTamat.value);
+            const semakMasa = () => {
+                const formatMula = to24(timeMula.value);
+                const formatTamat = to24(timeTamat.value);
 
-                    if(formatMula && formatTamat && formatTamat <=formatMula){
-                        console.log('masuk')
-                        timeTamat.value = '';
+                if (formatMula && formatTamat && formatTamat <= formatMula) {
+                    timeTamat.value = '';
+                    if (typeof toastr !== 'undefined') {
+                        toastr.warning('Masa Check Out mestilah selepas masa Check In.', 'Peringatan Waktu');
                     }
                 }
-                timeMula.addEventListener('change', semakMasa);
-                timeTamat.addEventListener('change', semakMasa);
-               
-            });
+            };
+
+            timeMula.addEventListener('change', semakMasa);
+            timeTamat.addEventListener('change', semakMasa);
         }
+
+        // Semakan Masa untuk Tambah Kehadiran Manual
+        pasangSemakMasa('task_start_time', 'task_end_time');
+
+        // Semakan Masa untuk Pembetulan / Sunting Kehadiran
+        pasangSemakMasa('edit_check_in', 'edit_check_out');
 
         if (input) {
             input.addEventListener('input', syncStaffFilterSelection);

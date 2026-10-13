@@ -126,7 +126,7 @@ class Attendance extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'staff_id', 'staff_id');
+        return $this->belongsTo(User::class, 'staff_id', 'staff_id')->withTrashed();
     }
 
     /**

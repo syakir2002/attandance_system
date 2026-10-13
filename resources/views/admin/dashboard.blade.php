@@ -5,6 +5,37 @@
 
 @section('content')
 <div class="space-y-6 sm:space-y-8">
+    @if(($incompleteAttendanceCount ?? 0) > 0)
+        <!-- Slim Alert Banner untuk Sesi Tidak Clock Out -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-50 to-white border border-amber-200/80 p-4 sm:p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-start sm:items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 border border-amber-200 shadow-2xs">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-xs sm:text-sm font-bold text-slate-900">Perhatian: Sesi Kehadiran Tidak Clock Out</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200/80 text-amber-900 border border-amber-300">
+                            {{ $incompleteAttendanceCount }} Sesi Memerlukan Tindakan
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-0.5">
+                        Terdapat staf yang tidak melengkapkan sesi clock out pada hari sebelumnya. Anda boleh semak dan kemaskini di halaman pembetulan.
+                    </p>
+                </div>
+            </div>
+            <a href="{{ route('admin.attendance.index', ['status' => 'incomplete']) }}" 
+               class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-colors shrink-0">
+                <span>Semak Rekod</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+    @endif
+
     <!-- Top KPI Stat Cards (4 Cards) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <!-- 1. Jumlah Staf -->

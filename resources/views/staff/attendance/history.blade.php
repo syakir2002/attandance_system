@@ -19,7 +19,7 @@
                         Perhatian: Rekod Belum Lengkap
                     </div>
                     <h3 class="text-sm sm:text-base font-extrabold text-slate-900">
-                        Anda mempunyai {{ $incompleteCount }} sesi 'Incomplete' (terlupa Clock Out).
+                        Anda mempunyai {{ $incompleteCount }} sesi 'Tidak Lengkap' (terlupa Clock Out).
                     </h3>
                     <p class="text-xs sm:text-sm text-slate-600 mt-0.5 leading-relaxed">
                         Sila klik butang <strong class="text-amber-800 font-bold">"Kemaskini Clock Out"</strong> pada rekod berkaitan sebelum akhir bulan. Sesi yang tidak dikemaskini sebelum akhir bulan tidak akan diambil kira dalam jumlah masa bekerja anda.
@@ -66,6 +66,15 @@
                 </select>
             </div>
 
+            <!-- Tapisan Status -->
+            <div>
+                <select name="status" id="filter_status" class="px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Semua Status</option>
+                    <option value="completed" {{ $selectedStatus === 'completed' ? 'selected' : '' }}>Selesai</option>
+                    <option value="incomplete" {{ $selectedStatus === 'incomplete' ? 'selected' : '' }}>Tidak Lengkap</option>
+                </select>
+            </div>
+
             <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -73,7 +82,7 @@
                 Tapis
             </button>
 
-            @if(!empty($selectedDate) || request()->has('date') || request()->has('month') || request()->has('year'))
+            @if(!empty($selectedDate) || request()->has('date') || request()->has('month') || request()->has('year') || !empty($selectedStatus))
                 <a href="{{ route('staff.attendance.history') }}" 
                    title="Set semula tapisan"
                    class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer inline-flex items-center gap-1">
@@ -222,12 +231,12 @@
                                     <div class="inline-flex items-center gap-2 justify-end">
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
                                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                            Incomplete
+                                            Tidak Lengkap
                                         </span>
 
                                         @if(!$isPastCutoff)
                                             <button type="button" 
-                                                    onclick="openClockOutModal('{{ $record->id }}', '{{ \Carbon\Carbon::parse($record->date)->isoFormat('dddd, D MMM Y') }}', '{{ $record->check_in ? date('h:i A', strtotime($record->check_in)) : '-' }}')" 
+                                                    onclick="openClockOutModal('{{ $record->id }}', '{{ \Carbon\Carbon::parse($record->date)->isoFormat('dddd, D MMM Y') }}', '{{ $record->check_in ? date('h:i A', strtotime($record->check_in)) : '-' }}', '{{ $record->check_in ? date('H:i', strtotime($record->check_in)) : '' }}')" 
                                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
                                                     style="background-color: #d97706; color: #ffffff; border: 1px solid #b45309;"
                                                     onmouseover="this.style.backgroundColor='#b45309'"
@@ -245,8 +254,8 @@
                                         @endif
                                     </div>
                                 @elseif($record->isActive())
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                                         Aktif
                                     </span>
                                 @else
@@ -356,6 +365,25 @@
                     </p>
                 </div>
 
+                <!-- Option: Overtime Cross-Midnight / Next Day -->
+                <div class="p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/50 space-y-2">
+                    <label class="flex items-start gap-2.5 cursor-pointer">
+                        <input type="checkbox" 
+                               name="is_next_day" 
+                               id="modal_is_next_day" 
+                               value="1" 
+                               class="mt-0.5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4"
+                               onchange="toggleNextDayNotice(this.checked)">
+                        <div class="text-xs">
+                            <span class="font-bold text-slate-800 block">Sesi OT Merentas Tengah Malam / Keesokan Pagi</span>
+                            <span class="text-slate-500 text-[11px] block mt-0.5">Tandakan jika sesi bertugas melepasi 12:00 tengah malam (cth: tamat jam 1:00 AM - 6:00 AM keesokan harinya).</span>
+                        </div>
+                    </label>
+                    <div id="nextDayNoticeBox" style="display: none;" class="pt-2 border-t border-indigo-100/80 text-[11px] text-indigo-800 leading-relaxed">
+                        <span class="font-bold"></span> Sesi hari ini akan ditamatkan pada <span class="font-mono-num font-bold">12:00 AM</span>, dan baki jam dari <span class="font-mono-num font-bold">12:00 AM</span> hingga masa Clock Out sebagai rekod <strong class="bg-indigo-100 px-1.5 py-0.5 rounded text-indigo-700 font-bold">OT</strong> pada hari berikutnya.
+                    </div>
+                </div>
+
                 <!-- Input Keterangan / Sebab -->
                 <div>
                     <label for="modal_keterangan_out" class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color: #334155;">
@@ -409,7 +437,67 @@
 
 @push('scripts')
 <script>
-    function openClockOutModal(sessionId, formattedDate, checkInTime) {
+    function to24(timeStr) {
+        if (!timeStr) return '';
+        timeStr = timeStr.trim();
+        if (timeStr.includes('AM') || timeStr.includes('PM')) {
+            let [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+            let h = parseInt(hours, 10);
+            if (modifier === 'PM' && h < 12) {
+                h += 12;
+            } else if (modifier === 'AM' && h === 12) {
+                h = 0;
+            }
+            return `${String(h).padStart(2, '0')}:${minutes ? minutes.substring(0, 2) : '00'}`;
+        }
+        return timeStr.substring(0, 5);
+    }
+
+    function semakMasaClockOut(showToast = true) {
+        const checkOutInput = document.getElementById('modal_check_out');
+        const nextDayCheckbox = document.getElementById('modal_is_next_day');
+        const clockInElem = document.getElementById('modalClockIn');
+
+        if (!checkOutInput || !clockInElem) return true;
+
+        // Sekiranya staf menandakan pilihan 'OT Merentas Tengah Malam', benarkan waktu awal pagi keesokan hari
+        if (nextDayCheckbox && nextDayCheckbox.checked) {
+            return true;
+        }
+
+        const valOut = checkOutInput.value;
+        if (!valOut) return true;
+
+        const rawIn = clockInElem.dataset.raw || clockInElem.textContent || '';
+        const formatIn = to24(rawIn);
+        const formatOut = to24(valOut);
+
+        if (formatIn && formatOut && formatOut <= formatIn) {
+            checkOutInput.value = '';
+            if (showToast && typeof toastr !== 'undefined') {
+                toastr.warning(
+                    'Masa Clock Out mestilah selepas masa Clock In (' + (clockInElem.textContent.trim() || formatIn) + '). Sekiranya anda tamat bertugas melepasi 12 tengah malam, sila tandakan "Sesi OT Merentas Tengah Malam".',
+                    'Peringatan Waktu'
+                );
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    function toggleNextDayNotice(checked) {
+        const box = document.getElementById('nextDayNoticeBox');
+        if (box) {
+            box.style.display = checked ? 'block' : 'none';
+        }
+        if (!checked) {
+            semakMasaClockOut(true);
+        }
+    }
+
+    function openClockOutModal(sessionId, formattedDate, checkInTime, rawCheckIn = '') {
         const modal = document.getElementById('clockOutModal');
         const form = document.getElementById('clockOutForm');
         const url = '{{ route("staff.attendance.update_clock_out", ":id") }}'.replace(':id', sessionId);
@@ -417,10 +505,18 @@
         form.action = url;
         document.getElementById('modalSessionId').textContent = sessionId;
         document.getElementById('modalDate').textContent = formattedDate;
-        document.getElementById('modalClockIn').textContent = checkInTime;
+        const clockInElem = document.getElementById('modalClockIn');
+        clockInElem.textContent = checkInTime;
+        clockInElem.dataset.raw = rawCheckIn || to24(checkInTime);
         document.getElementById('modal_check_out').value = '';
         document.getElementById('modal_keterangan_out').value = '';
         
+        const nextDayCheckbox = document.getElementById('modal_is_next_day');
+        if (nextDayCheckbox) {
+            nextDayCheckbox.checked = false;
+            toggleNextDayNotice(false);
+        }
+
         modal.style.display = 'flex';
         document.body.classList.add('overflow-hidden');
     }
@@ -440,6 +536,25 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
+        const checkOutInput = document.getElementById('modal_check_out');
+        if (checkOutInput) {
+            checkOutInput.addEventListener('change', function () {
+                semakMasaClockOut(true);
+            });
+        }
+
+        const clockOutForm = document.getElementById('clockOutForm');
+        if (clockOutForm) {
+            clockOutForm.addEventListener('submit', function (e) {
+                if (!semakMasaClockOut(true)) {
+                    e.preventDefault();
+                    if (checkOutInput) {
+                        checkOutInput.focus();
+                    }
+                }
+            });
+        }
+
         const dateInput = document.getElementById('filter_date');
         const monthSelect = document.getElementById('filter_month');
         const yearSelect = document.getElementById('filter_year');

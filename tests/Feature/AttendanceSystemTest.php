@@ -322,12 +322,56 @@ test('admin can create, update, and manage staff accounts', function () {
     $resetResponse->assertRedirect(route('admin.staff.index'));
     expect(Hash::check('resetPass456', $newStaff->fresh()->password))->toBeTrue();
 
-    // Delete staff
+    // Delete staff (Soft Delete)
     $deleteResponse = $this->actingAs($this->admin)
         ->delete(route('admin.staff.destroy', 'STF_02'));
 
     $deleteResponse->assertRedirect(route('admin.staff.index'));
     expect(User::where('staff_id', 'STF_02')->exists())->toBeFalse();
+    expect(User::withTrashed()->where('staff_id', 'STF_02')->exists())->toBeTrue();
+    expect(User::withTrashed()->where('staff_id', 'STF_02')->first()->trashed())->toBeTrue();
+
+    // Restore staff
+    $restoreResponse = $this->actingAs($this->admin)
+        ->post(route('admin.staff.restore', 'STF_02'));
+
+    $restoreResponse->assertRedirect(route('admin.staff.index', ['status' => 'active']));
+    expect(User::where('staff_id', 'STF_02')->exists())->toBeTrue();
+    expect(User::find('STF_02')->trashed())->toBeFalse();
+});
+
+test('admin can soft delete staff who has attendance records without losing attendance history', function () {
+    $staff = User::create([
+        'staff_id' => 'STF_HIST',
+        'name' => 'History Staff',
+        'email' => 'hist@test.com',
+        'password' => Hash::make('password123'),
+        'role' => 'staff',
+    ]);
+
+    $attendance = Attendance::create([
+        'id' => 'STF_HIST-20261013-01',
+        'staff_id' => 'STF_HIST',
+        'check_in' => '08:00:00',
+        'check_out' => '17:00:00',
+        'date' => '2026-10-13',
+        'status' => 'completed',
+    ]);
+
+    $response = $this->actingAs($this->admin)
+        ->delete(route('admin.staff.destroy', 'STF_HIST'));
+
+    $response->assertRedirect(route('admin.staff.index'));
+
+    // User is soft deleted, not hard deleted
+    expect(User::where('staff_id', 'STF_HIST')->exists())->toBeFalse();
+    expect(User::withTrashed()->where('staff_id', 'STF_HIST')->exists())->toBeTrue();
+
+    // Attendance record still exists and loads user relationship via withTrashed
+    expect(Attendance::where('id', 'STF_HIST-20261013-01')->exists())->toBeTrue();
+    $savedAttendance = Attendance::find('STF_HIST-20261013-01');
+    expect($savedAttendance->user)->not->toBeNull();
+    expect($savedAttendance->user->staff_id)->toBe('STF_HIST');
 });
 
 test('admin can reset staff filters to show all roles', function () {
@@ -397,6 +441,40 @@ test('admin can add manual attendance and correct records recalculating period',
     expect($updated->check_in)->toBe('09:00:00');
     expect($updated->check_out)->toBe('17:00:00');
     expect($updated->period)->toBe('08:00:00');
+});
+
+test('admin cannot set check_out earlier than or equal to check_in in store or update', function () {
+    // 1. Store check
+    $storeFail = $this->actingAs($this->admin)
+        ->from(route('admin.attendance.index'))
+        ->post(route('admin.attendance.store'), [
+            'staff_id' => $this->staff->staff_id,
+            'date' => '2026-02-15',
+            'check_in' => '17:00',
+            'check_out' => '08:00',
+        ]);
+
+    $storeFail->assertSessionHas('error', 'Masa Check Out mestilah selepas masa Check In.');
+
+    // 2. Update check
+    $record = Attendance::create([
+        'id' => 'STF_01-20260215-01',
+        'staff_id' => $this->staff->staff_id,
+        'date' => '2026-02-15',
+        'check_in' => '08:00:00',
+        'check_out' => null,
+    ]);
+
+    $updateFail = $this->actingAs($this->admin)
+        ->from(route('admin.attendance.index'))
+        ->put(route('admin.attendance.update', $record->id), [
+            'date' => '2026-02-15',
+            'check_in' => '17:00',
+            'check_out' => '08:00',
+        ]);
+
+    $updateFail->assertSessionHas('error', 'Masa Check Out mestilah selepas masa Check In.');
+    expect($record->fresh()->check_out)->toBeNull();
 });
 
 test('admin can delete attendance record and views render modern action confirmation modal', function () {

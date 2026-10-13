@@ -96,7 +96,7 @@
             "preventDuplicates": false,
             "showDuration": "1000",
             "hideDuration": "1000",
-            "timeOut": "1000",
+            "timeOut": "1500",
             "extendedTimeOut": "1500",
             "showEasing": "swing",
             "hideEasing": "linear",
@@ -126,7 +126,7 @@
 
         @if($errors->any())
             @foreach($errors->all() as $error)
-                toastr.error(@json($error), 'Ralat Borang');
+                toastr.error(@json($error), 'Log Masuk TIdak Berjaya');
             @endforeach
         @endif
     </script>

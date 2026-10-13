@@ -15,6 +15,8 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
+        Attendance::syncIncompleteSessions();
+
         $admin = Auth::user();
         $today = now()->format('Y-m-d');
 

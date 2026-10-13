@@ -25,23 +25,48 @@ class AttendanceManagementController extends Controller
     {
         Attendance::syncIncompleteSessions();
 
-        $staffId = $request->input('staff_id', '');
-        $date = $request->input('date', '');
-        $month = $request->input('month', '');
-        $year = $request->input('year', '');
+        $staffId = trim((string) $request->input('staff_id', ''));
+        $staffSearch = trim((string) $request->input('staff_search', ''));
+        $date = trim((string) $request->input('date', ''));
+        $month = trim((string) $request->input('month', ''));
+        $year = trim((string) $request->input('year', ''));
+        $status = trim((string) $request->input('status', ''));
         $query = Attendance::with('user');
 
         if ($staffId !== '') {
             $query->where('staff_id', $staffId);
+        } elseif ($staffSearch !== '') {
+            $query->where(function ($q) use ($staffSearch) {
+                $q->where('staff_id', 'like', "%{$staffSearch}%")
+                    ->orWhereHas('user', function ($uq) use ($staffSearch) {
+                        $uq->where('name', 'like', "%{$staffSearch}%");
+                    });
+            });
         }
 
-        if ($date !== null && $date !== '') {
+        if ($status === 'completed') {
+            $query->where(function ($q) {
+                $q->where('status', 'completed')
+                    ->orWhere(function ($sub) {
+                        $sub->whereNull('status')->whereNotNull('check_out');
+                    });
+            });
+        } elseif ($status === 'incomplete') {
+            $query->where(function ($q) {
+                $q->where('status', 'incomplete')
+                    ->orWhere(function ($sub) {
+                        $sub->whereNull('status')->whereNull('check_out');
+                    });
+            });
+        }
+
+        if ($date !== '') {
             $query->where('date', $date);
         } else {
-            if ($year !== '' && $year !== null) {
+            if ($year !== '') {
                 $query->whereYear('date', $year);
             }
-            if ($month !== '' && $month !== null) {
+            if ($month !== '') {
                 $query->whereMonth('date', $month);
             }
         }
@@ -59,9 +84,11 @@ class AttendanceManagementController extends Controller
             'records',
             'staffList',
             'staffId',
+            'staffSearch',
             'date',
             'month',
-            'year'
+            'year',
+            'status'
         ));
     }
 
@@ -91,6 +118,10 @@ class AttendanceManagementController extends Controller
         $checkOut = null;
         if (! empty($validated['check_out'])) {
             $checkOut = strlen($validated['check_out']) === 5 ? $validated['check_out'].':00' : $validated['check_out'];
+        }
+
+        if (! empty($checkOut) && $checkOut <= $checkIn) {
+            return back()->withInput()->with('error', 'Masa Check Out mestilah selepas masa Check In.');
         }
 
         // Generate Custom ID: {staff_id}-{YYYYMMDD}-{session_number}
@@ -164,6 +195,10 @@ class AttendanceManagementController extends Controller
         $checkOut = null;
         if (! empty($validated['check_out'])) {
             $checkOut = strlen($validated['check_out']) === 5 ? $validated['check_out'].':00' : $validated['check_out'];
+        }
+
+        if (! empty($checkOut) && $checkOut <= $checkIn) {
+            return back()->withInput()->with('error', 'Masa Check Out mestilah selepas masa Check In.');
         }
 
         // Automatic re-calculation of period
@@ -357,8 +392,8 @@ class AttendanceManagementController extends Controller
                                 $isFirstRecord ? $dayLabel : '',
                                 $note,
                                 Carbon::parse($record->check_in)->format('h:i A'),
-                                $record->check_out ? Carbon::parse($record->check_out)->format('h:i A') : '',
-                                $record->period ? substr($record->period, 0, 5) : '',
+                                $record->check_out ? Carbon::parse($record->check_out)->format('h:i A') : '-',
+                                $record->period ? substr($record->period, 0, 5) : '00:00',
                                 $isFirstRecord ? sprintf('%02d:%02d', $dayHours, intdiv($dayTotalSeconds % 3600, 60)) : '',
                                 $isFirstRecord ? number_format($dayScore, 1) : '',
                             ];
@@ -381,7 +416,9 @@ class AttendanceManagementController extends Controller
                 }
             }
 
-            return response(TCPDF::Output($filename, 'S'), Response::HTTP_OK, [
+            $pdfOutputMode = app()->runningUnitTests() ? 'S' : 'I';
+
+            return response(TCPDF::Output($filename, $pdfOutputMode), Response::HTTP_OK, [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="'.$filename.'"',
             ]);

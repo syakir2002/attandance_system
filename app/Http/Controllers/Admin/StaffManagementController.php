@@ -20,8 +20,13 @@ class StaffManagementController extends Controller
         $showAllRoles = $request->input('role') === 'all';
         $search = $showAllRoles ? '' : trim($request->input('search', ''));
         $roleFilter = 'staff';
+        $statusFilter = $request->input('status', 'active');
 
         $query = User::query();
+
+        if ($statusFilter === 'trashed') {
+            $query->onlyTrashed();
+        }
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -40,7 +45,9 @@ class StaffManagementController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.staff.index', compact('users', 'search', 'roleFilter'));
+        $trashedCount = User::onlyTrashed()->where('role', 'staff')->count();
+
+        return view('admin.staff.index', compact('users', 'search', 'roleFilter', 'statusFilter', 'trashedCount'));
     }
 
     /**
@@ -48,6 +55,17 @@ class StaffManagementController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $trashedStaff = User::onlyTrashed()
+            ->where(function ($q) use ($request) {
+                $q->where('staff_id', $request->input('staff_id'))
+                    ->orWhere('email', $request->input('email'));
+            })
+            ->first();
+
+        if ($trashedStaff) {
+            return back()->withInput()->with('error', "Staff ID atau Emel ini pernah didaftarkan tetapi telah dipadam (soft delete). Sila pulihkan akaun tersebut daripada senarai 'Staf Dipadam'.");
+        }
+
         $validated = $request->validate([
             'staff_id' => ['required', 'string', 'max:50', 'unique:user,staff_id'],
             'name' => ['required', 'string', 'max:255'],
@@ -121,7 +139,7 @@ class StaffManagementController extends Controller
     }
 
     /**
-     * Remove the specified staff member from storage.
+     * Remove the specified staff member from storage (Soft Delete).
      */
     public function destroy(string $staffId): RedirectResponse
     {
@@ -132,15 +150,22 @@ class StaffManagementController extends Controller
             return back()->with('error', 'Anda tidak boleh memadam akaun anda sendiri.');
         }
 
-        // Check if user has attendance records
-        $attendanceCount = $user->attendances()->count();
-        if ($attendanceCount > 0) {
-            return back()->with('error', "Staf {$user->staff_id} mempunyai {$attendanceCount} rekod kehadiran dan tidak boleh dipadam untuk mengekalkan integriti data.");
-        }
-
+        $userName = $user->name;
         $user->delete();
 
         return redirect()->route('admin.staff.index')
-            ->with('success', "Akaun staf {$user->staff_id} ({$user->name}) telah dipadam.");
+            ->with('success', "Akaun staf {$user->staff_id} ({$userName}) telah dipadam.");
+    }
+
+    /**
+     * Restore the specified soft-deleted staff member.
+     */
+    public function restore(string $staffId): RedirectResponse
+    {
+        $user = User::onlyTrashed()->findOrFail($staffId);
+        $user->restore();
+
+        return redirect()->route('admin.staff.index', ['status' => 'active'])
+            ->with('success', "Akaun staf {$user->staff_id} ({$user->name}) telah berjaya dipulihkan.");
     }
 }

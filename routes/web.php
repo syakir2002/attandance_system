@@ -73,6 +73,7 @@ Route::prefix('admin')
         Route::put('/staff/{staff_id}', [StaffManagementController::class, 'update'])->name('staff.update');
         Route::post('/staff/{staff_id}/reset-password', [StaffManagementController::class, 'resetPassword'])->name('staff.reset_password');
         Route::delete('/staff/{staff_id}', [StaffManagementController::class, 'destroy'])->name('staff.destroy');
+        Route::post('/staff/{staff_id}/restore', [StaffManagementController::class, 'restore'])->name('staff.restore');
 
         // Attendance Management & Correction
         Route::get('/attendance', [AttendanceManagementController::class, 'index'])->name('attendance.index');

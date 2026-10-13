@@ -228,6 +228,7 @@ class AttendanceController extends Controller
         $selectedDate = $request->input('date', '');
         $selectedMonth = (int) $request->input('month', now()->month);
         $selectedYear = (int) $request->input('year', now()->year);
+        $selectedStatus = (string) $request->input('status', '');
 
         $query = Attendance::where('staff_id', $user->staff_id);
 
@@ -247,6 +248,22 @@ class AttendanceController extends Controller
             if (! empty($selectedMonth)) {
                 $query->whereMonth('date', $selectedMonth);
             }
+        }
+
+        if ($selectedStatus === 'incomplete') {
+            $query->where(function ($q) {
+                $q->where('status', 'incomplete')
+                    ->orWhere(function ($sub) {
+                        $sub->whereNull('check_out')
+                            ->where('date', '<', now()->toDateString());
+                    });
+            });
+        } elseif ($selectedStatus === 'completed') {
+            $query->whereNotNull('check_out')
+                ->where(function ($q) {
+                    $q->where('status', '!=', 'incomplete')
+                        ->orWhereNull('status');
+                });
         }
 
         // Clone for stats
@@ -285,6 +302,7 @@ class AttendanceController extends Controller
             'selectedDate',
             'selectedMonth',
             'selectedYear',
+            'selectedStatus',
             'totalHours',
             'totalMinutes',
             'totalDaysPresent',
@@ -319,24 +337,80 @@ class AttendanceController extends Controller
 
         $request->validate([
             'check_out' => ['required', 'date_format:H:i'],
+            'is_next_day' => ['nullable', 'boolean'],
             'keterangan_out' => ['nullable', 'string', 'max:255'],
         ], [
             'check_out.required' => 'Sila masukkan masa Clock Out.',
             'check_out.date_format' => 'Format masa tidak sah (HH:mm).',
         ]);
 
+        $isNextDay = $request->boolean('is_next_day');
         $checkOutTime = $request->input('check_out').':00';
 
         $inTime = Carbon::createFromTimeString($attendance->check_in);
         $outTime = Carbon::createFromTimeString($checkOutTime);
 
-        if ($outTime->lessThanOrEqualTo($inTime)) {
-            return back()->with('error', 'Masa Clock Out mestilah selepas masa Clock In ('.Carbon::createFromTimeString($attendance->check_in)->format('h:i A').').');
+        // If not next day, checkout must be strictly after checkin on the same day
+        if (! $isNextDay && $outTime->lessThanOrEqualTo($inTime)) {
+            return back()->with('error', 'Masa Clock Out mestilah selepas masa Clock In ('.Carbon::createFromTimeString($attendance->check_in)->format('h:i A').'). Jika sesi bertugas melepasi 12 tengah malam (cth jam 3:00 AM keesokan harinya), sila tandakan pilihan "Sesi OT Merentas Tengah Malam / Keesokan Pagi".');
         }
 
-        $period = Attendance::calculatePeriod($attendance->check_in, $checkOutTime);
+        // Future check: date + checkout time cannot exceed current date/time
+        $attendanceDate = Carbon::parse($attendance->date);
+        $checkOutDate = $isNextDay ? $attendanceDate->copy()->addDay() : $attendanceDate->copy();
+        $fullCheckOutDateTime = Carbon::parse($checkOutDate->format('Y-m-d').' '.$checkOutTime);
+
+        if ($fullCheckOutDateTime->isFuture()) {
+            return back()->with('error', 'Masa Clock Out yang dimasukkan tidak boleh berlapis dengan sesi clock in yang hadapan.');
+        }
 
         $note = trim((string) $request->input('keterangan_out', ''));
+
+        if ($isNextDay) {
+            // Sesi Hari 1 ditamatkan pada 00:00 (tengah malam)
+            $periodFirst = Attendance::calculatePeriod($attendance->check_in, '00:00');
+            $keteranganOutFirst = $note !== '' ? "[Kemaskini Lupa Clock Out OT (Hari 1)] {$note}" : '[Kemaskini Lupa Clock Out OT (Hari 1)]';
+
+            $attendance->update([
+                'check_out' => '00:00',
+                'period' => $periodFirst,
+                'status' => 'completed',
+                'keterangan_out' => $keteranganOutFirst,
+            ]);
+
+            // Sesi Hari 2 (Keesokan harinya) dicipta dari 00:00 hingga checkOutTime
+            $dateSecond = $checkOutDate->format('Y-m-d');
+            $datePartSecond = $checkOutDate->format('Ymd');
+            $sessionCountSecond = Attendance::where('staff_id', $user->staff_id)
+                ->where('date', $dateSecond)
+                ->count();
+            $customIdSecond = $this->genId($user->staff_id, $datePartSecond, $sessionCountSecond);
+
+            $periodSecond = Attendance::calculatePeriod('00:00', $checkOutTime);
+            $keteranganOutSecond = $note !== '' ? "[Kemaskini Lupa Clock Out OT] {$note}" : '[Kemaskini Lupa Clock Out OT]';
+
+            Attendance::create([
+                'id' => $customIdSecond[0],
+                'staff_id' => $user->staff_id,
+                'check_in' => '00:00',
+                'check_out' => $checkOutTime,
+                'date' => $dateSecond,
+                'keterangan_in' => 'OT',
+                'keterangan_out' => $keteranganOutSecond,
+                'keterangan_admin' => null,
+                'period' => $periodSecond,
+                'status' => 'completed',
+            ]);
+
+            $formattedDateFirst = $attendanceDate->format('d/m/Y');
+            $formattedDateSecond = $checkOutDate->format('d/m/Y');
+
+            return redirect()->route('staff.attendance.history')
+                ->with('success', "Masa Clock Out bagi sesi {$attendance->id} berjaya dikemaskini. Sesi Hari 1 ({$formattedDateFirst}) ditamatkan pada 00:00 ({$periodFirst}), dan sesi OT Hari 2 ({$formattedDateSecond}) dari 00:00 hingga {$checkOutTime} ({$periodSecond}) telah direkodkan secara automatik.");
+        }
+
+        // Sesi biasa pada hari yang sama
+        $period = Attendance::calculatePeriod($attendance->check_in, $checkOutTime);
         $keteranganOut = $note !== '' ? "[Kemaskini Lupa Clock Out] {$note}" : '[Kemaskini Lupa Clock Out]';
 
         $attendance->update([
