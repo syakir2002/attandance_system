@@ -4,6 +4,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
@@ -121,5 +122,82 @@ test('admin can delete a task via calendar events API', function () {
 
     $this->assertDatabaseMissing('callendar_info', [
         'id' => $event->id,
+    ]);
+});
+
+test('admin can fetch terengganu public holidays in calendar events', function () {
+    Http::fake([
+        '*holidays*' => Http::response([
+            'data' => [
+                [
+                    'name' => 'Hari Ulang Tahun Pertabalan Sultan Terengganu',
+                    'date' => '2026-03-04',
+                    'day_name' => 'Wednesday',
+                    'is_subject_to_change' => false,
+                ],
+            ],
+            'meta' => [
+                'year' => 2026,
+                'count' => 1,
+                'state' => 'TRG',
+            ],
+        ], 200),
+    ]);
+
+    $response = $this->actingAs($this->admin)->getJson(route('admin.calendar.events', [
+        'start' => '2026-03-01T00:00:00',
+        'end' => '2026-03-31T23:59:59',
+        'status' => 'all',
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertJsonFragment([
+        'raw_title' => 'Hari Ulang Tahun Pertabalan Sultan Terengganu',
+        'source' => 'holiday',
+        'state_code' => 'TRG',
+    ]);
+});
+
+test('admin can filter calendar events to only holidays', function () {
+    CalendarEvent::create([
+        'title' => 'Tugasan Pejabat',
+        'start_at' => '2026-03-05 10:00:00',
+        'end_at' => '2026-03-05 11:00:00',
+        'status' => 1,
+        'timestamps' => now(),
+    ]);
+
+    Http::fake([
+        '*holidays*' => Http::response([
+            'data' => [
+                [
+                    'name' => 'Hari Ulang Tahun Pertabalan Sultan Terengganu',
+                    'date' => '2026-03-04',
+                    'day_name' => 'Wednesday',
+                    'is_subject_to_change' => false,
+                ],
+            ],
+            'meta' => [
+                'year' => 2026,
+                'count' => 1,
+                'state' => 'TRG',
+            ],
+        ], 200),
+    ]);
+
+    $response = $this->actingAs($this->admin)->getJson(route('admin.calendar.events', [
+        'start' => '2026-03-01T00:00:00',
+        'end' => '2026-03-31T23:59:59',
+        'status' => 'holidays',
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertJsonCount(1);
+    $response->assertJsonFragment([
+        'source' => 'holiday',
+        'raw_title' => 'Hari Ulang Tahun Pertabalan Sultan Terengganu',
+    ]);
+    $response->assertJsonMissing([
+        'raw_title' => 'Tugasan Pejabat',
     ]);
 });

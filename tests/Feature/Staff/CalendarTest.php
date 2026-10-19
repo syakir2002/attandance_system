@@ -4,6 +4,7 @@ use App\Models\CalendarEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
@@ -72,4 +73,51 @@ test('guest cannot access staff calendar', function () {
 
     $responseEvents = $this->getJson(route('staff.calendar.events'));
     $responseEvents->assertStatus(401);
+});
+
+test('staff can fetch terengganu public holidays in date range', function () {
+    CalendarEvent::create([
+        'title' => 'Hari Keluarga Syarikat',
+        'description' => 'Acara tahunan.',
+        'start_at' => '2026-03-05 09:00:00',
+        'end_at' => '2026-03-05 17:00:00',
+        'status' => 1,
+        'display_style' => 'block',
+        'timestamps' => now(),
+    ]);
+
+    Http::fake([
+        '*holidays*' => Http::response([
+            'data' => [
+                [
+                    'name' => 'Hari Ulang Tahun Pertabalan Sultan Terengganu',
+                    'date' => '2026-03-04',
+                    'day_name' => 'Wednesday',
+                    'is_subject_to_change' => false,
+                ],
+            ],
+            'meta' => [
+                'year' => 2026,
+                'count' => 1,
+                'state' => 'TRG',
+            ],
+        ], 200),
+    ]);
+
+    $response = $this->actingAs($this->staff)->getJson(route('staff.calendar.events', [
+        'start' => '2026-03-01T00:00:00',
+        'end' => '2026-03-31T23:59:59',
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertJsonCount(2);
+    $response->assertJsonFragment([
+        'raw_title' => 'Hari Ulang Tahun Pertabalan Sultan Terengganu',
+        'source' => 'holiday',
+        'state_code' => 'TRG',
+    ]);
+    $response->assertJsonFragment([
+        'raw_title' => 'Hari Keluarga Syarikat',
+        'source' => 'task',
+    ]);
 });

@@ -200,6 +200,7 @@
         transition: transform 0.15s, box-shadow 0.15s;
         display: flex !important;
         align-items: center !important;
+        white-space: normal !important;
     }
 
     /* Hide the inner dot inside Block mode */
@@ -207,10 +208,23 @@
         display: none !important;
     }
 
-    .fc-custom-block-event .fc-event-time,
+    .fc-custom-block-event .fc-event-time {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        margin-right: 4px !important;
+        flex-shrink: 0 !important;
+    }
+
     .fc-custom-block-event .fc-event-title {
         color: #ffffff !important;
         font-weight: 600 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.25;
     }
 
     /* Public Block (Emerald Gradient) */
@@ -242,6 +256,21 @@
         transform: translateY(-1px);
         box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
     }
+
+    /* 3. Holiday Block (Amber / Gold Gradient - Cuti Umum Terengganu) */
+    .fc-holiday-block {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+        border: 1px solid #b45309 !important;
+        color: #ffffff !important;
+        font-size: 0.775rem !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 4px rgba(217, 119, 6, 0.22);
+    }
+    .fc-holiday-block:hover {
+        background: linear-gradient(135deg, #b45309 0%, #92400e 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(217, 119, 6, 0.3);
+    }
 </style>
 @endpush
 
@@ -252,18 +281,19 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Calendar</h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">Pengurusan jadual aktiviti awam (Public) dan peribadi (Private).</p>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1">Pengurusan jadual aktiviti awam (Public), peribadi (Private), dan cuti umum Terengganu.</p>
         </div>
 
         <!-- Filter Controls -->
         <div class="flex items-center gap-2.5">
             <!-- Filter Status Dropdown -->
             <div class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 shadow-xs">
-                <span class="text-slate-400">Status:</span>
+                <span class="text-slate-400">Paparan:</span>
                 <select id="filter-status" class="bg-transparent border-none text-xs font-bold text-slate-800 focus:outline-none cursor-pointer">
-                    <option value="all">Semua (Public & Private)</option>
+                    <option value="all">Semua (Tugasan & Cuti Umum)</option>
                     <option value="public">🌐 Public Sahaja</option>
                     <option value="private">🔒 Private Sahaja</option>
+                    <option value="holidays">🏖️ Cuti Umum Terengganu Sahaja</option>
                 </select>
             </div>
         </div>
@@ -275,7 +305,7 @@
         <!-- Top Action Bar (Add New Button + Legend) -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-slate-100">
             <!-- Legend Indicators -->
-            <div class="flex flex-wrap items-center gap-3 text-xs">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     Public — Awam
@@ -283,6 +313,10 @@
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
                     Private — Peribadi
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 font-semibold border border-amber-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    Cuti Umum (Terengganu)
                 </span>
                 <span class="hidden md:inline text-slate-300">•</span>
                 <span class="hidden md:inline text-slate-400 text-[11px]">Klik pada mana-mana tarikh untuk menambah tugasan</span>
@@ -635,6 +669,8 @@ document.addEventListener('DOMContentLoaded', function () {
         selectMirror: true,
         dayMaxEvents: 3,
         nowIndicator: true,
+        fixedWeekCount: false,
+        showNonCurrentDates: false,
 
         // Fetch events from backend API with status filtering
         events: function (fetchInfo, successCallback, failureCallback) {
@@ -663,7 +699,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Click on an event to view details
         eventClick: function (info) {
             const props = info.event.extendedProps || {};
-            activeEventId = props.db_id || null;
+            const isHoliday = props.source === 'holiday';
+            activeEventId = isHoliday ? null : (props.db_id || null);
 
             document.getElementById('detail-title').innerText = props.raw_title || info.event.title;
             document.getElementById('detail-start').innerText = props.start_formatted || info.event.startStr;
@@ -674,51 +711,57 @@ document.addEventListener('DOMContentLoaded', function () {
             extraContainer.innerHTML = '';
             statusBadgeContainer.innerHTML = '';
 
-            document.getElementById('detail-modal-title').innerText = 'Maklumat Tugasan';
-            document.getElementById('detail-label-title').innerText = 'Tajuk Tugasan';
-            btnDeleteEvent.classList.remove('hidden');
-            btnDeleteEvent.classList.add('inline-flex');
+            if (isHoliday) {
+                document.getElementById('detail-modal-title').innerText = 'Maklumat Cuti Umum';
+                document.getElementById('detail-label-title').innerText = 'Nama Cuti Kelepasan Am';
+                btnDeleteEvent.classList.remove('inline-flex');
+                btnDeleteEvent.classList.add('hidden');
 
-            // const isBlockStyle = props.display_style === 'block';
-            // const styleBadge = isBlockStyle
-            //     ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-            //          <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-            //          Sorotan Penuh (Block)
-            //        </span>`
-            //     : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-            //          <span class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-            //          Titik Ringkas (Dot)
-            //        </span>`;
+                const changeBadge = props.is_subject_to_change
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                         ⚠️ Tertakluk Kepada Perubahan Rasmi
+                       </span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                         ✓ Cuti Gazet Rasmi
+                       </span>`;
 
-            // if (props.status === 1) {
-            //     statusBadgeContainer.innerHTML = `
-            //         <div class="flex flex-wrap items-center gap-2">
-            //             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-            //                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-            //                 Public — Boleh Dilihat Oleh Semua Staf
-            //             </span>
-            //             ${styleBadge}
-            //         </div>
-            //     `;
-            // } else {
-            //     statusBadgeContainer.innerHTML = `
-            //         <div class="flex flex-wrap items-center gap-2">
-            //             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
-            //                 <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-            //                 Private — Kegunaan Peribadi Pentadbir
-            //             </span>
-            //             ${styleBadge}
-            //         </div>
-            //     `;
-            // }
-
-            if (props.description && props.description.trim() !== '') {
-                extraContainer.innerHTML = `
-                    <div class="mt-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Deskripsi / Butiran Acara</span>
-                        <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed">${props.description}</p>
+                statusBadgeContainer.innerHTML = `
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-500 text-white shadow-xs">
+                            🏖️ ${props.state_name || 'Negeri Terengganu'}
+                        </span>
+                        ${changeBadge}
                     </div>
                 `;
+
+                extraContainer.innerHTML = `
+                    <div class="mt-2.5 p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/80">
+                        <div class="flex items-center gap-2 text-amber-800 font-bold text-xs mb-1.5">
+                            <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Pelepasan Am Terengganu & Persekutuan</span>
+                        </div>
+                        <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed">${props.description || 'Cuti umum rasmi bagi Negeri Terengganu.'}</p>
+                        <div class="mt-2.5 pt-2 border-t border-amber-200/60 text-[10px] text-slate-400">
+                            Disegerakkan secara automatik melalui API Cuti Malaysia (BKPP / JPM).
+                        </div>
+                    </div>
+                `;
+            } else {
+                document.getElementById('detail-modal-title').innerText = 'Maklumat Tugasan';
+                document.getElementById('detail-label-title').innerText = 'Tajuk Tugasan';
+                btnDeleteEvent.classList.remove('hidden');
+                btnDeleteEvent.classList.add('inline-flex');
+
+                if (props.description && props.description.trim() !== '') {
+                    extraContainer.innerHTML = `
+                        <div class="mt-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Deskripsi / Butiran Acara</span>
+                            <p class="text-xs text-slate-700 whitespace-pre-line leading-relaxed">${props.description}</p>
+                        </div>
+                    `;
+                }
             }
 
             modalDetail.style.display = 'flex';

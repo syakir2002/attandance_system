@@ -174,6 +174,11 @@
         transition: transform 0.15s, box-shadow 0.15s;
         display: flex !important;
         align-items: center !important;
+        white-space: normal !important;
+    }
+
+    /* Public Block (Emerald Gradient) */
+    .fc-public-block {
         background: linear-gradient(135deg, #059669 0%, #0d9488 100%) !important;
         border: 1px solid #059669 !important;
         color: #ffffff !important;
@@ -182,20 +187,49 @@
         box-shadow: 0 2px 4px rgba(5, 150, 105, 0.22);
     }
 
-    .fc-custom-block-event:hover {
+    .fc-public-block:hover {
         background: linear-gradient(135deg, #047857 0%, #0f766e 100%) !important;
         transform: translateY(-1px);
         box-shadow: 0 4px 6px rgba(5, 150, 105, 0.3);
+    }
+
+    /* Holiday Block (Amber / Gold Gradient - Cuti Umum Terengganu) */
+    .fc-holiday-block {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+        border: 1px solid #b45309 !important;
+        color: #ffffff !important;
+        font-size: 0.775rem !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 4px rgba(217, 119, 6, 0.22);
+    }
+
+    .fc-holiday-block:hover {
+        background: linear-gradient(135deg, #b45309 0%, #92400e 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(217, 119, 6, 0.3);
     }
 
     .fc-custom-block-event .fc-daygrid-event-dot {
         display: none !important;
     }
 
-    .fc-custom-block-event .fc-event-time,
+    .fc-custom-block-event .fc-event-time {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        margin-right: 4px !important;
+        flex-shrink: 0 !important;
+    }
+
     .fc-custom-block-event .fc-event-title {
         color: #ffffff !important;
         font-weight: 600 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.25;
     }
 
     /* List View Overrides */
@@ -227,7 +261,7 @@
                     Kalendar & Jadual Aktiviti Syarikat
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-                    Semak jadual aktiviti rasmi syarikat, mesyuarat, kursus, dan hebahan am yang dimasukkan oleh pihak pentadbir.
+                    Semak jadual aktiviti rasmi syarikat, cuti umum Terengganu, mesyuarat, kursus, dan hebahan am.
                 </p>
             </div>
 
@@ -236,6 +270,10 @@
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     Hebahan Rasmi / Acara Awam
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    Cuti Umum (Terengganu)
                 </span>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 text-xs font-semibold">
                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -281,7 +319,7 @@
                 </div>
                 <div>
                     <h3 class="text-sm sm:text-base font-bold text-slate-900" id="detail-modal-title">Maklumat Acara</h3>
-                    <p class="text-[11px] text-slate-500">Hebahan Rasmi Syarikat</p>
+                    <p class="text-[11px] text-slate-500" id="detail-modal-subtitle">Hebahan Rasmi Syarikat</p>
                 </div>
             </div>
             <button type="button" 
@@ -297,7 +335,7 @@
         <div class="p-6 space-y-4">
             <!-- Title Card -->
             <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100/80">
-                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">Nama Acara / Tugasan</span>
+                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block mb-1" id="detail-title-label">Nama Acara / Tugasan</span>
                 <p class="text-base font-bold text-slate-900 leading-snug" id="detail-title">-</p>
             </div>
 
@@ -322,7 +360,7 @@
             <div class="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/70">
                 <div class="flex items-center justify-between mb-1.5">
                     <span class="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Deskripsi & Butiran Acara</span>
-                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200" id="detail-badge-type">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         Rasmi
                     </span>
@@ -337,7 +375,7 @@
                 <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>Acara ini dimasukkan oleh pihak pentadbir untuk makluman seluruh staf. Sila hubungi pihak pengurusan jika memerlukan penyelarasan lanjut.</span>
+                <span id="detail-note-text">Acara ini dimasukkan oleh pihak pentadbir untuk makluman seluruh staf. Sila hubungi pihak pengurusan jika memerlukan penyelarasan lanjut.</span>
             </div>
         </div>
 
@@ -401,6 +439,8 @@ document.addEventListener('DOMContentLoaded', function () {
         selectable: false,
         nowIndicator: true,
         dayMaxEvents: true,
+        fixedWeekCount: false,
+        showNonCurrentDates: false,
         noEventsText: 'Tiada acara untuk dipaparkan',
         events: function (fetchInfo, successCallback, failureCallback) {
             if (loadingEl) loadingEl.style.display = 'flex';
@@ -432,15 +472,48 @@ document.addEventListener('DOMContentLoaded', function () {
         eventClick: function (info) {
             info.jsEvent.preventDefault();
             const props = info.event.extendedProps || {};
+            const isHoliday = props.source === 'holiday';
 
             document.getElementById('detail-title').textContent = props.raw_title || info.event.title;
             document.getElementById('detail-start').textContent = props.start_formatted || info.event.startStr;
             document.getElementById('detail-end').textContent = props.end_formatted || (info.event.endStr || '-');
 
-            const descText = props.description && props.description.trim() !== ''
-                ? props.description
-                : 'Tiada butiran tambahan dinyatakan untuk acara ini.';
-            document.getElementById('detail-description').textContent = descText;
+            const modalTitleEl = document.getElementById('detail-modal-title');
+            const modalSubtitleEl = document.getElementById('detail-modal-subtitle');
+            const titleLabelEl = document.getElementById('detail-title-label');
+            const badgeTypeEl = document.getElementById('detail-badge-type');
+            const noteTextEl = document.getElementById('detail-note-text');
+
+            if (isHoliday) {
+                if (modalTitleEl) modalTitleEl.textContent = 'Maklumat Cuti Umum';
+                if (modalSubtitleEl) modalSubtitleEl.textContent = 'Pelepasan Am Terengganu & Persekutuan';
+                if (titleLabelEl) titleLabelEl.textContent = 'Nama Cuti Kelepasan Am';
+                if (badgeTypeEl) {
+                    badgeTypeEl.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300';
+                    badgeTypeEl.innerHTML = props.is_subject_to_change
+                        ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>⚠️ Tertakluk Kepada Perubahan'
+                        : '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>✓ Cuti Gazet Rasmi';
+                }
+                if (noteTextEl) {
+                    noteTextEl.textContent = 'Cuti umum rasmi bagi Negeri Terengganu. Disegerakkan secara automatik melalui API Cuti Malaysia (BKPP / JPM).';
+                }
+                document.getElementById('detail-description').textContent = props.description || 'Cuti umum rasmi bagi Negeri Terengganu.';
+            } else {
+                if (modalTitleEl) modalTitleEl.textContent = 'Maklumat Acara';
+                if (modalSubtitleEl) modalSubtitleEl.textContent = 'Hebahan Rasmi Syarikat';
+                if (titleLabelEl) titleLabelEl.textContent = 'Nama Acara / Tugasan';
+                if (badgeTypeEl) {
+                    badgeTypeEl.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200';
+                    badgeTypeEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Rasmi';
+                }
+                if (noteTextEl) {
+                    noteTextEl.textContent = 'Acara ini dimasukkan oleh pihak pentadbir untuk makluman seluruh staf. Sila hubungi pihak pengurusan jika memerlukan penyelarasan lanjut.';
+                }
+                const descText = props.description && props.description.trim() !== ''
+                    ? props.description
+                    : 'Tiada butiran tambahan dinyatakan untuk acara ini.';
+                document.getElementById('detail-description').textContent = descText;
+            }
 
             if (modalDetail) {
                 modalDetail.style.display = 'flex';

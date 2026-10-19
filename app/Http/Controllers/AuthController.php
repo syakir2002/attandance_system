@@ -32,6 +32,7 @@ class AuthController extends Controller
      */
     public function login(Request $request): RedirectResponse
     {
+
         $credentials = $request->validate([
             'login' => ['required', 'string'],
             'password' => ['required', 'string'],
@@ -45,7 +46,6 @@ class AuthController extends Controller
 
         // Email comparison follows the database collation; Staff ID must match exactly.
         $user = User::where('email', $loginInput)->first();
-
         if (! $user) {
             $staffUser = User::where('staff_id', $loginInput)->first();
             $user = $staffUser?->staff_id === $loginInput ? $staffUser : null;

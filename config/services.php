@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'malaysia_holiday' => [
+        'url' => env('MALAYSIA_HOLIDAY_API_URL', 'https://malaysia-holiday.dydxsoft.my/api/v1'),
+        'default_state' => env('MALAYSIA_HOLIDAY_STATE', 'TRG'),
+    ],
+
 ];

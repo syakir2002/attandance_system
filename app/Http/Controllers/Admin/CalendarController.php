@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CalendarEvent;
+use App\Services\MalaysiaHolidayService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,6 +12,10 @@ use Illuminate\View\View;
 
 class CalendarController extends Controller
 {
+    public function __construct(
+        protected MalaysiaHolidayService $holidayService,
+    ) {}
+
     /**
      * Display the calendar view.
      */
@@ -20,60 +25,72 @@ class CalendarController extends Controller
     }
 
     /**
-     * Fetch calendar events from callendar_info table.
+     * Fetch calendar events from callendar_info table and Terengganu holidays.
      */
     public function events(Request $request): JsonResponse
     {
         $start = $request->query('start');
         $end = $request->query('end');
-        $statusFilter = $request->query('status'); // 'all', 'public', 'private'
+        $statusFilter = $request->query('status'); // 'all', 'public', 'private', 'holidays'
 
         $events = [];
 
         // 1. Fetch Task/Event records from callendar_info table
-        $tasksQuery = CalendarEvent::query();
+        if ($statusFilter !== 'holidays') {
+            $tasksQuery = CalendarEvent::query();
 
-        if ($start && $end) {
+            if ($start && $end) {
+                $startDate = Carbon::parse($start)->startOfDay();
+                $endDate = Carbon::parse($end)->endOfDay();
+                $tasksQuery->whereBetween('start_at', [$startDate, $endDate]);
+            }
+
+            if ($statusFilter === 'public') {
+                $tasksQuery->where('status', 1);
+            } elseif ($statusFilter === 'private') {
+                $tasksQuery->where('status', 0);
+            }
+
+            $tasks = $tasksQuery->orderBy('start_at')->get();
+
+            foreach ($tasks as $task) {
+                $isBlock = ($task->display_style ?? 'dot') === 'block';
+                $isPublic = (int) $task->status === 1;
+
+                $events[] = [
+                    'id' => 'task_'.$task->id,
+                    'title' => $task->title,
+                    'start' => $task->start_at->toIso8601String(),
+                    'end' => $task->end_at ? $task->end_at->toIso8601String() : null,
+                    'allDay' => false,
+                    'className' => $isBlock
+                        ? ($isPublic ? 'fc-custom-block-event fc-public-block' : 'fc-custom-block-event fc-private-block')
+                        : ($isPublic ? 'fc-custom-dot-event fc-public-dot' : 'fc-custom-dot-event fc-private-dot'),
+                    'extendedProps' => [
+                        'source' => 'task',
+                        'db_id' => $task->id,
+                        'raw_title' => $task->title,
+                        'description' => $task->description,
+                        'status' => (int) $task->status,
+                        'is_public' => $isPublic,
+                        'status_label' => $isPublic ? 'Public (Awam / Semua Staf)' : 'Private (Peribadi / Admin Sahaja)',
+                        'display_style' => $task->display_style ?? 'dot',
+                        'is_block' => $isBlock,
+                        'start_formatted' => $task->start_at->translatedFormat('d M Y, h:i A'),
+                        'end_formatted' => $task->end_at ? $task->end_at->translatedFormat('d M Y, h:i A') : '-',
+                    ],
+                ];
+            }
+        }
+
+        // 2. Fetch Malaysia Public Holidays for Terengganu (TRG)
+        if ($statusFilter !== 'private' && $start && $end) {
             $startDate = Carbon::parse($start)->startOfDay();
             $endDate = Carbon::parse($end)->endOfDay();
-            $tasksQuery->whereBetween('start_at', [$startDate, $endDate]);
-        }
+            $state = (string) $request->query('state', config('services.malaysia_holiday.default_state', 'TRG'));
 
-        if ($statusFilter === 'public') {
-            $tasksQuery->where('status', 1);
-        } elseif ($statusFilter === 'private') {
-            $tasksQuery->where('status', 0);
-        }
-
-        $tasks = $tasksQuery->orderBy('start_at')->get();
-
-        foreach ($tasks as $task) {
-            $isBlock = ($task->display_style ?? 'dot') === 'block';
-            $isPublic = (int) $task->status === 1;
-
-            $events[] = [
-                'id' => 'task_'.$task->id,
-                'title' => $task->title,
-                'start' => $task->start_at->toIso8601String(),
-                'end' => $task->end_at ? $task->end_at->toIso8601String() : null,
-                'allDay' => false,
-                'className' => $isBlock
-                    ? ($isPublic ? 'fc-custom-block-event fc-public-block' : 'fc-custom-block-event fc-private-block')
-                    : ($isPublic ? 'fc-custom-dot-event fc-public-dot' : 'fc-custom-dot-event fc-private-dot'),
-                'extendedProps' => [
-                    'source' => 'task',
-                    'db_id' => $task->id,
-                    'raw_title' => $task->title,
-                    'description' => $task->description,
-                    'status' => (int) $task->status,
-                    'is_public' => $isPublic,
-                    'status_label' => $isPublic ? 'Public (Awam / Semua Staf)' : 'Private (Peribadi / Admin Sahaja)',
-                    'display_style' => $task->display_style ?? 'dot',
-                    'is_block' => $isBlock,
-                    'start_formatted' => $task->start_at->translatedFormat('d M Y, h:i A'),
-                    'end_formatted' => $task->end_at ? $task->end_at->translatedFormat('d M Y, h:i A') : '-',
-                ],
-            ];
+            $holidayEvents = $this->holidayService->getAsCalendarEvents($startDate, $endDate, $state);
+            $events = array_merge($events, $holidayEvents);
         }
 
         return response()->json($events);
